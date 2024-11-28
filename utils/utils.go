@@ -1,0 +1,1 @@
+//insert useful and generic functions that don't go anywhere else
