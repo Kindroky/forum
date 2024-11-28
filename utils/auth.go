@@ -1,1 +1,0 @@
-//functions for cookies and authentification : Le taf de jimmy

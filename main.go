@@ -1,45 +1,32 @@
 package main
 
 import (
-    "html/template"
-    "forum/handlers"
-    "forum/db"
-    "log"
-    "net/http"
+	"forum/db"
+	"forum/handlers"
+	"log"
+	"net/http"
 )
 
 func main() {
-    // Initialisation de la base de données
-    database := db.InitDB("db/forum.db")
-    defer database.Close()
+	// Initialize the database
+	database := db.InitDB("db/forum.db")
+	defer database.Close()
 
-    	// Création des tables
+	// Create tables if they don't exist
 	db.CreateTables()
+	log.Println("Database initialized successfully.")
 
-    log.Println("Base de données initialisée avec succès.")
+	// Set up routes
+	mux := http.NewServeMux()
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+	mux.HandleFunc("/register", handlers.Register)
+	mux.HandleFunc("/login", handlers.Login)
+	mux.HandleFunc("/addpost", handlers.AddPost)
+	mux.HandleFunc("/", handlers.Homepage) // Use the dedicated Homepage handler
 
-    // Routes
-    mux := http.NewServeMux()
-    mux.HandleFunc("/register", handlers.Register)
-    mux.HandleFunc("/login", handlers.Login)
-    mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        tmpl, err := template.ParseFiles("templates/home.html")
-        if err != nil {
-            http.Error(w, "Erreur lors du chargement de la page", http.StatusInternalServerError)
-            return
-        }
-        posts, err := handlers.GetPosts()
-        if err!=nil {
-            http.Error(w, "Erreur lors de la recuperation des posts", http.StatusInternalServerError)
-            return
-        }
-        tmpl.Execute(w, posts)
-    })
-    
-
-    // Démarrage du serveur
-    log.Println("Le serveur est lancé sur http://localhost:8080")
-    if err := http.ListenAndServe(":8080", mux); err != nil {
-        log.Fatalf("Erreur lors du démarrage du serveur : %v", err)
-    }
+	// Start the server
+	log.Println("Server running at http://localhost:8080")
+	if err := http.ListenAndServe(":8080", mux); err != nil {
+		log.Fatalf("Server startup error: %v", err)
+	}
 }

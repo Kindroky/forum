@@ -1,0 +1,53 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    justify-content: center;
+    width: 400px;
+    height:auto;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.post-button-container {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.post-button {
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.feed .welcome-message {
+    text-align: center;
+    color: #333f10;
+    font-style: italic;
+    margin-bottom: 20px;
+}
+
+.post {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: #fff;
+    border-radius: 5px;
+}
+
+h2 {
+    margin-top: 0;
+}
