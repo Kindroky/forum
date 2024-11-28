@@ -39,12 +39,14 @@ func GetPosts() ([]Post, error) {
 
 // Register handle user registration
 func Register(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
-		return
-	}
-
-	email := r.FormValue("email")
+	if r.Method == http.MethodGet {
+		t, err := template.ParseFiles(`templates/register.html`)
+		if err != nil {
+			http.Error(w, "internal serveur error", http.StatusInternalServerError)
+		}
+		t.Execute(w, nil)
+	} else if r.Method == http.MethodPost {
+		email := r.FormValue("email")
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
@@ -69,16 +71,16 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintf(w, "Utilisateur créé avec succès !")
-}
 
-// Login handle user login
-func Login(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
+	} else  {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 		return
 	}
-
-	email := r.FormValue("email")
+}
+// Login handle user login
+func Login(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		email := r.FormValue("email")
 	password := r.FormValue("password")
 
 	if email == "" || password == "" {
@@ -101,8 +103,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	})
 
 	fmt.Fprintf(w, "Connexion réussie !")
+	} else if r.Method == http.MethodGet {
+		if r.Method == http.MethodGet {
+			t, err := template.ParseFiles(`templates/login.html`)
+			if err != nil {
+				http.Error(w, "internal serveur error", http.StatusInternalServerError)
+			}
+			t.Execute(w, nil)
+		}
+	}
 }
-
 // ForumPage affiche tous les posts
 /*func ForumPage(w http.ResponseWriter, r *http.Request) {
 	posts, err := GetPosts()
