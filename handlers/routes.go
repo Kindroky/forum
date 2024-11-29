@@ -50,14 +50,9 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintf(w, "Utilisateur créé avec succès !")
-
-// Login handles user login
-func Login(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
-		return
 	}
 }
+
 // Login handle user login
 func Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {

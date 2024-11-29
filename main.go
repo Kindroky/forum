@@ -1,11 +1,10 @@
 package main
 
 import (
-	"html/template"
+	"forum/db"
+	"forum/handlers"
 	"log"
 	"net/http"
-	"forum/handlers"
-	"forum/db"
 )
 
 func main() {
