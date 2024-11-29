@@ -10,8 +10,8 @@ import (
 
 func main() {
 	// Initialize the database
-	database := db.InitDB("db/forum.db")
-	defer database.Close()
+	dbConn := db.InitDB("db/forum.db")
+	defer dbConn.Close()
 
 	// Create tables if they don't exist
 	db.CreateTables()
@@ -23,7 +23,7 @@ func main() {
 	mux.HandleFunc("/register", handlers.Register)
 	mux.HandleFunc("/login", handlers.Login)
 	mux.HandleFunc("/addpost", handlers.AddPost)
-	mux.HandleFunc("/", handlers.Homepage) // Use the dedicated Homepage handler
+	mux.HandleFunc("/", handlers.Homepage)
 
 	// Start the server
 	log.Println("Server running at http://localhost:8080")
