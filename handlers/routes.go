@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"html/template"
-	"forum/db"
 	"fmt"
+	"forum/db"
+	"html/template"
 	"log"
 	"net/http"
 )
@@ -15,29 +15,7 @@ type Post struct {
 	UserID  int
 }
 
-// GetPosts récupère tous les posts
-func GetPosts() ([]Post, error) {
-	dbConn := db.GetDBConnection()
-	rows, err := dbConn.Query("SELECT * FROM posts")
-	if err != nil {
-		log.Printf("Erreur lors de la récupération des posts : %v", err)
-		return nil, err
-	}
-	defer rows.Close()
-
-	var posts []Post
-	for rows.Next() {
-		var post Post
-		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.UserID); err != nil {
-			log.Printf("Erreur lors du scan des posts : %v", err)
-			return nil, err
-		}
-		posts = append(posts, post)
-	}
-	return posts, nil
-}
-
-// Register handle user registration
+// Register handles user registration
 func Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		t, err := template.ParseFiles(`templates/register.html`)
@@ -72,7 +50,9 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w, "Utilisateur créé avec succès !")
 
-	} else  {
+// Login handles user login
+func Login(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
 		http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
 		return
 	}
@@ -98,7 +78,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_id",
-		Value:    "some-unique-session-id", // Remplacer par une vraie gestion de session
+		Value:    "some-unique-session-id", // Replace with actual session management logic
 		HttpOnly: true,
 	})
 
@@ -125,33 +105,57 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 // AddPost permet aux utilisateurs d'ajouter un post
 func AddPost(w http.ResponseWriter, r *http.Request) {
-    if r.Method == http.MethodGet {
-        tmpl, err := template.ParseFiles("templates/addpost.html")
-        if err != nil {
-            http.Error(w, "Erreur lors du chargement de la page", http.StatusInternalServerError)
-            return
-        }
-        tmpl.Execute(w, nil)
-        return
-    }
+	if r.Method == http.MethodGet {
+		tmpl, err := template.ParseFiles("templates/addpost.html")
+		if err != nil {
+			http.Error(w, "Erreur lors du chargement de la page", http.StatusInternalServerError)
+			return
+		}
+		tmpl.Execute(w, nil)
+		return
+	}
 
-    if r.Method == http.MethodPost {
-        title := r.FormValue("title")
-        content := r.FormValue("content")
+	if r.Method == http.MethodPost {
+		title := r.FormValue("title")
+		content := r.FormValue("content")
 
-        if title == "" || content == "" {
-            http.Error(w, "Tous les champs sont requis", http.StatusBadRequest)
-            return
-        }
+		if title == "" || content == "" {
+			http.Error(w, "Tous les champs sont requis", http.StatusBadRequest)
+			return
+		}
 
-        dbConn := db.GetDBConnection()
-        _, err := dbConn.Exec("INSERT INTO posts (title, content, user_id) VALUES (?, ?, ?)", title, content, 1)
-        if err != nil {
-            log.Printf("Erreur lors de l'ajout du post : %v", err)
-            http.Error(w, "Erreur interne", http.StatusInternalServerError)
-            return
-        }
+		err := db.CreatePost(title, content, 1) // Assuming user_id = 1
+		if err != nil {
+			log.Printf("Erreur lors de l'ajout du post : %v", err)
+			http.Error(w, "Erreur interne", http.StatusInternalServerError)
+			return
+		}
 
-        http.Redirect(w, r, "/", http.StatusSeeOther)
-    }
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+}
+
+// Homepage displays all posts on the homepage
+func Homepage(w http.ResponseWriter, r *http.Request) {
+	posts, err := db.GetPosts()
+	if err != nil {
+		log.Printf("Error fetching posts: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("templates/homepage.html")
+	if err != nil {
+		log.Printf("Error loading homepage template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, struct {
+		Posts []db.Post
+	}{Posts: posts})
+	if err != nil {
+		log.Printf("Error executing template: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>League Forum</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="/static/FoL-Logo.png" alt="Forum Name">
+        </header>
+        <main>
+            <div class="post-button-container">
+                <button onclick="window.location.href='/addpost'" class="post-button">Create a Post</button>
+            </div>
+            <div class="feed">
+                <!-- Welcome message always appears at the top -->
+                <div class="welcome-message">
+                    Welcome to the land of totally unbiased takes. Become a legend and share your 200 IQ meta predictions and champion sob stories! Theory craft some questionable builds or dissect events like you're a pro analyst! The community is ready to agree, or flame you once again...
+                </div>
+                
+                <!-- Render posts below the welcome message -->
+                {{ if .Posts }}
+                    {{ range .Posts }}
+                        <div class="post">
+                            <h2>{{ .Title }}</h2>
+                            <p>{{ .Content }}</p>
+                        </div>
+                    {{ end }}
+                {{ end }}
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+
+
