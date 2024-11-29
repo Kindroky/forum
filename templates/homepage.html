@@ -3,24 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>League Forum</title>
+    <title>FoL</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <div class="container">
         <header>
             <img src="/static/FoL-Logo.png" alt="Forum Name">
-        </header>
-        <main>
             <div class="post-button-container">
-                <button onclick="window.location.href='/addpost'" class="post-button">Create a Post</button>
+                <button onclick="window.location.href='/addpost'" class="post-button">Create Post</button>
             </div>
-            <div class="feed">
-                <!-- Welcome message always appears at the top -->
+        </header>
+        <main class="main-layout">
+            <div class="home-icon">
+                <a href="/">
+                <img src="/static/FoL-ICON.png" alt="Forum Icon">
+                </a>
+            </div>
+            <!-- Sidebar for Categories -->
+            <aside class="sidebar">
+                <h3>Categories</h3>
+                <div class="category-buttons">
+                    <button onclick="window.location.href='/?category=items'">Items</button>
+                    <button onclick="window.location.href='/?category=champs'">Champs</button>
+                    <button onclick="window.location.href='/?category=meta'">Meta</button>
+                    <button onclick="window.location.href='/?category=events'">Events</button>
+                </div>
+            </aside>
+            
+            <!-- Feed Content -->
+            <section class="feed">
                 <div class="welcome-message">
                     Welcome to the land of totally unbiased takes. Become a legend and share your 200 IQ meta predictions and champion sob stories! Theory craft some questionable builds or dissect events like you're a pro analyst! The community is ready to agree, or flame you once again...
                 </div>
-                
+
                 <!-- Render posts below the welcome message -->
                 {{ if .Posts }}
                     {{ range .Posts }}
@@ -29,11 +45,20 @@
                             <p>{{ .Content }}</p>
                         </div>
                     {{ end }}
+                {{ else }}
+                    <p>No posts available. Be the first to create one!</p>
                 {{ end }}
-            </div>
+            </section>
+
+            <!-- Profile Sidebar -->
+            <aside class="profile-sidebar">
+                <div class="profile-box">
+                    <h3>Guest</h3> 
+                    <p> Rank: Caca 0</p>
+                </div>
+            </aside>
         </main>
     </div>
 </body>
 </html>
-
 

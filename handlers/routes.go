@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"forum/db"
 	"html/template"
@@ -96,13 +97,20 @@ func AddPost(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		title := r.FormValue("title")
 		content := r.FormValue("content")
+		category := r.FormValue("category")
 
-		if title == "" || content == "" {
+		if title == "" || content == "" || category == "" {
 			http.Error(w, "Tous les champs sont requis", http.StatusBadRequest)
 			return
 		}
 
-		err := db.CreatePost(title, content, 1) // Assuming user_id = 1
+		validCategories := map[string]bool{"items": true, "champs": true, "meta": true, "events": true}
+		if !validCategories[category] {
+			http.Error(w, "Invalid category", http.StatusBadRequest)
+			return
+		}
+
+		err := db.CreatePost(title, content, category, 1) // Assuming user_id = 1
 		if err != nil {
 			log.Printf("Erreur lors de l'ajout du post : %v", err)
 			http.Error(w, "Erreur interne", http.StatusInternalServerError)
@@ -113,19 +121,29 @@ func AddPost(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Homepage displays all posts on the homepage
+// Homepage displays posts with optional category filtering
 func Homepage(w http.ResponseWriter, r *http.Request) {
-	posts, err := db.GetPosts()
+	category := r.URL.Query().Get("category")
+
+	var posts []db.Post
+	var err error
+
+	if category == "" {
+		posts, err = db.GetPosts()
+	} else {
+		posts, err = db.GetPostsByCategory(category)
+	}
+
 	if err != nil {
-		log.Printf("Error fetching posts: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Printf("Erreur lors de la récupération des posts : %v", err)
+		http.Error(w, "Erreur interne", http.StatusInternalServerError)
 		return
 	}
 
 	tmpl, err := template.ParseFiles("templates/homepage.html")
 	if err != nil {
-		log.Printf("Error loading homepage template: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Printf("Erreur lors du chargement du template : %v", err)
+		http.Error(w, "Erreur interne", http.StatusInternalServerError)
 		return
 	}
 
@@ -133,7 +151,40 @@ func Homepage(w http.ResponseWriter, r *http.Request) {
 		Posts []db.Post
 	}{Posts: posts})
 	if err != nil {
-		log.Printf("Error executing template: %v", err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		log.Printf("Erreur lors de l'exécution du template : %v", err)
+		http.Error(w, "Erreur interne", http.StatusInternalServerError)
 	}
+}
+
+func GetPostsByCategory(w http.ResponseWriter, r *http.Request) {
+	category := r.URL.Query().Get("category")
+	validCategories := map[string]bool{"items": true, "champs": true, "meta": true, "events": true}
+
+	if !validCategories[category] {
+		http.Error(w, "Invalid category", http.StatusBadRequest)
+		return
+	}
+
+	// Use the database connection from the db package
+	dbConn := db.GetDBConnection()
+
+	rows, err := dbConn.Query("SELECT id, title, content, category, user_id FROM posts WHERE category = ? ORDER BY id DESC", category)
+	if err != nil {
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	// Serialize the posts and return them as JSON
+	posts := []db.Post{}
+	for rows.Next() {
+		var post db.Post
+		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.UserID); err != nil {
+			http.Error(w, "Error scanning data", http.StatusInternalServerError)
+			return
+		}
+		posts = append(posts, post)
+	}
+
+	json.NewEncoder(w).Encode(posts)
 }
