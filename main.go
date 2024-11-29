@@ -12,15 +12,12 @@ func main() {
 	dbConn := db.InitDB("db/forum.db")
 	defer dbConn.Close()
 
-	// Create tables if they don't exist
-	db.CreateTables()
-	log.Println("Database initialized successfully.")
-
 	// Set up routes
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	mux.HandleFunc("/register", handlers.Register)
 	mux.HandleFunc("/login", handlers.Login)
+	mux.HandleFunc("/logout", handlers.Logout)
 	mux.HandleFunc("/addpost", handlers.AddPost)
 	mux.HandleFunc("/", handlers.Homepage)
 

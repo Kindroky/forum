@@ -1,8 +1,10 @@
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE NOT NULL,
-    username TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
+    email TEXT NOT NULL UNIQUE,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    session_id TEXT,
+    LP INTEGER DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS posts (

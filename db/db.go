@@ -16,6 +16,10 @@ func InitDB(dataSourceName string) *sql.DB {
 	if err != nil {
 		log.Fatalf("Erreur lors de l'ouverture de la base de données : %v", err)
 	}
+
+	// Ensure the session_id column exists
+	ensureSessionIDColumn()
+
 	return database
 }
 
@@ -24,42 +28,78 @@ func GetDBConnection() *sql.DB {
 	return database
 }
 
+// Ensure the session_id column exists in the users table
+func ensureSessionIDColumn() {
+	// Check if session_id column exists, and add it if not
+	_, err := database.Exec("ALTER TABLE users ADD COLUMN session_id TEXT;")
+	if err != nil {
+		if err.Error() != "duplicate column name: session_id" { // Ignore if the column already exists
+			log.Printf("Error adding session_id column: %v", err)
+		}
+	}
+}
+
+// CreateTables initializes the database tables.
 func CreateTables() {
-	// Create posts table if it doesn't exist
-	createPostsTable := `
-    CREATE TABLE IF NOT EXISTS posts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        content TEXT NOT NULL,
-        category TEXT NOT NULL,
-        user_id INTEGER NOT NULL,
-        FOREIGN KEY(user_id) REFERENCES users(id)
-    );`
-	_, err := database.Exec(createPostsTable)
-	if err != nil {
-		log.Fatalf("Erreur lors de la création de la table posts : %v", err)
-	}
-
-	// Ensure the "category" column exists in the posts table
-	_, err = database.Exec("ALTER TABLE posts ADD COLUMN category TEXT NOT NULL DEFAULT 'general'")
-	if err != nil && err.Error() != "duplicate column name: category" {
-		log.Printf("Erreur lors de l'ajout de la colonne category : %v", err)
-	}
-
-	// Create users table if it doesn't exist
 	createUsersTable := `
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT NOT NULL UNIQUE,
-        username TEXT NOT NULL,
-        password TEXT NOT NULL
-    );`
-	_, err = database.Exec(createUsersTable)
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		email TEXT NOT NULL UNIQUE,
+		username TEXT NOT NULL,
+		password TEXT NOT NULL,
+		session_id TEXT,
+		LP INTEGER DEFAULT 0
+	);`
+
+	createPostsTable := `
+	CREATE TABLE IF NOT EXISTS posts (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		title TEXT NOT NULL,
+		content TEXT NOT NULL,
+		category TEXT NOT NULL,
+		user_id INTEGER NOT NULL,
+		FOREIGN KEY(user_id) REFERENCES users(id)
+	);`
+
+	createLikesTable := `
+	CREATE TABLE IF NOT EXISTS likes (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		post_id INTEGER NOT NULL,
+		user_id INTEGER NOT NULL,
+		FOREIGN KEY(post_id) REFERENCES posts(id),
+		FOREIGN KEY(user_id) REFERENCES users(id)
+	);`
+
+	createDislikesTable := `
+	CREATE TABLE IF NOT EXISTS dislikes (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		post_id INTEGER NOT NULL,
+		user_id INTEGER NOT NULL,
+		FOREIGN KEY(post_id) REFERENCES posts(id),
+		FOREIGN KEY(user_id) REFERENCES users(id)
+	);`
+
+	_, err := database.Exec(createUsersTable)
 	if err != nil {
-		log.Fatalf("Erreur lors de la création de la table users : %v", err)
+		log.Fatalf("Error creating users table: %v", err)
 	}
 
-	log.Println("Tables créées ou déjà existantes.")
+	_, err = database.Exec(createPostsTable)
+	if err != nil {
+		log.Fatalf("Error creating posts table: %v", err)
+	}
+
+	_, err = database.Exec(createLikesTable)
+	if err != nil {
+		log.Fatalf("Error creating likes table: %v", err)
+	}
+
+	_, err = database.Exec(createDislikesTable)
+	if err != nil {
+		log.Fatalf("Error creating dislikes table: %v", err)
+	}
+
+	log.Println("Database tables initialized successfully.")
 }
 
 // CreatePost inserts a new post into the posts table.
@@ -74,7 +114,19 @@ func CreatePost(title, content, category string, userID int) error {
 
 // GetPosts retrieves all posts from the database.
 func GetPosts() ([]Post, error) {
-	rows, err := database.Query("SELECT id, title, content, category, user_id FROM posts")
+	rows, err := database.Query(`
+		SELECT 
+			posts.id, posts.title, posts.content, posts.category, posts.user_id,
+			users.id, users.username, 
+			CASE 
+				WHEN users.LP >= 100 THEN 'Legend'
+				WHEN users.LP >= 50 THEN 'Pro'
+				ELSE 'Novice'
+			END AS rank, users.LP, users.session_id
+		FROM posts
+		JOIN users ON posts.user_id = users.id
+		ORDER BY posts.id DESC;
+	`)
 	if err != nil {
 		log.Printf("Erreur lors de la récupération des posts : %v", err)
 		return nil, err
@@ -84,10 +136,13 @@ func GetPosts() ([]Post, error) {
 	var posts []Post
 	for rows.Next() {
 		var post Post
-		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.UserID); err != nil {
+		var user User
+		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.UserID,
+			&user.ID, &user.Username, &user.Rank, &user.LP, &user.SessionID); err != nil {
 			log.Printf("Erreur lors du scan des posts : %v", err)
 			return nil, err
 		}
+		post.User = user
 		posts = append(posts, post)
 	}
 	return posts, nil
@@ -95,7 +150,20 @@ func GetPosts() ([]Post, error) {
 
 // GetPostsByCategory retrieves posts filtered by category.
 func GetPostsByCategory(category string) ([]Post, error) {
-	rows, err := database.Query("SELECT id, title, content, category, user_id FROM posts WHERE category = ?", category)
+	rows, err := database.Query(`
+		SELECT 
+			posts.id, posts.title, posts.content, posts.category, posts.user_id,
+			users.id, users.username, 
+			CASE 
+				WHEN users.LP >= 100 THEN 'Legend'
+				WHEN users.LP >= 50 THEN 'Pro'
+				ELSE 'Novice'
+			END AS rank, users.LP, users.session_id
+		FROM posts
+		JOIN users ON posts.user_id = users.id
+		WHERE posts.category = ?
+		ORDER BY posts.id DESC;
+	`, category)
 	if err != nil {
 		log.Printf("Erreur lors de la récupération des posts par catégorie : %v", err)
 		return nil, err
@@ -105,13 +173,22 @@ func GetPostsByCategory(category string) ([]Post, error) {
 	var posts []Post
 	for rows.Next() {
 		var post Post
-		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.UserID); err != nil {
+		var user User
+		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.UserID,
+			&user.ID, &user.Username, &user.Rank, &user.LP, &user.SessionID); err != nil {
 			log.Printf("Erreur lors du scan des posts : %v", err)
 			return nil, err
 		}
+		post.User = user
 		posts = append(posts, post)
 	}
 	return posts, nil
+}
+
+type HomepageData struct {
+	Authenticated bool
+	User          User
+	Posts         []Post
 }
 
 type Post struct {
@@ -120,4 +197,15 @@ type Post struct {
 	Content  string
 	Category string
 	UserID   int
+	User     User
+}
+
+type User struct {
+	ID        int
+	Email     string
+	Username  string
+	Password  string
+	Rank      string
+	LP        int
+	SessionID string
 }

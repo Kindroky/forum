@@ -11,15 +11,21 @@
         <header>
             <img src="/static/FoL-Logo.png" alt="Forum Name">
             <div class="post-button-container">
-                <button onclick="window.location.href='/addpost'" class="post-button">Create Post</button>
+                <!-- Conditional Create Post Button -->
+                {{ if .Authenticated }}
+                    <button onclick="window.location.href='/addpost'" class="post-button">Create Post</button>
+                {{ else }}
+                    <button onclick="window.location.href='/login'" class="post-button">Log In to Create Post</button>
+                {{ end }}
             </div>
         </header>
         <main class="main-layout">
             <div class="home-icon">
                 <a href="/">
-                <img src="/static/FoL-ICON.png" alt="Forum Icon">
+                    <img src="/static/FoL-ICON.png" alt="Forum Icon">
                 </a>
             </div>
+
             <!-- Sidebar for Categories -->
             <aside class="sidebar">
                 <h3>Categories</h3>
@@ -41,8 +47,40 @@
                 {{ if .Posts }}
                     {{ range .Posts }}
                         <div class="post">
-                            <h2>{{ .Title }}</h2>
-                            <p>{{ .Content }}</p>
+                            <!-- Post Header -->
+                            <div class="post-header">
+                                <h2>{{ .Title }}</h2>
+                                <div class="post-user-info">
+                                    <p><strong>{{ if .User.Username }}{{ .User.Username }}{{ else }}Unknown User{{ end }}</strong></p>
+                                    <p>Rank: {{ if .User.Rank }}{{ .User.Rank }}{{ else }}Unranked{{ end }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Post Content -->
+                            <div class="post-content">
+                                <p>{{ .Content }}</p>
+                            </div>
+
+                            <!-- Post Footer -->
+                            <hr class="post-divider">
+                            <div class="post-footer">
+                                <!-- Interaction Buttons -->
+                                {{ if $.Authenticated }}
+                                    <form action="/like" method="POST" class="like-form">
+                                        <input type="hidden" name="postID" value="{{ .ID }}">
+                                        <input type="hidden" name="likeType" value="1">
+                                        <button type="submit" class="like-button">👍 Like</button>
+                                    </form>
+                                    <form action="/like" method="POST" class="dislike-form">
+                                        <input type="hidden" name="postID" value="{{ .ID }}">
+                                        <input type="hidden" name="likeType" value="-1">
+                                        <button type="submit" class="dislike-button">👎 Dislike</button>
+                                    </form>
+                                    <button class="comment-button" onclick="window.location.href='/post/{{ .ID }}#comments'">💬 Comment</button>
+                                {{ else }}
+                                    <p>Please <a href="/login">log in</a> to interact with posts.</p>
+                                {{ end }}
+                            </div>
                         </div>
                     {{ end }}
                 {{ else }}
@@ -52,13 +90,24 @@
 
             <!-- Profile Sidebar -->
             <aside class="profile-sidebar">
-                <div class="profile-box">
-                    <h3>Guest</h3> 
-                    <p> Rank: Caca 0</p>
-                </div>
+                <!-- User Profile -->
+                {{ if .Authenticated }}
+                    <div class="profile-box">
+                        <h3>{{ if .User.Username }}{{ .User.Username }}{{ else }}Unknown User{{ end }}</h3>
+                        <p>Rank: {{ if .User.Rank }}{{ .User.Rank }}{{ else }}Unranked{{ end }} (LP: {{ .User.LP }})</p>
+                        <a href="/logout" class="logout-button">Log Out</a>
+                    </div>
+                {{ else }}
+                    <div class="profile-box">
+                        <h3>Welcome, Guest!</h3>
+                        <p><a href="/login">Log in</a> or <a href="/register">register</a> to join the community.</p>
+                    </div>
+                {{ end }}
             </aside>
         </main>
     </div>
 </body>
 </html>
+
+
 
