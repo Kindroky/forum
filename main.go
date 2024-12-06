@@ -9,6 +9,7 @@ import (
 
 func main() {
 	// Initialize the database
+	//comment for checkpoint commit
 	dbConn := db.InitDB("db/forum.db")
 	defer dbConn.Close()
 
