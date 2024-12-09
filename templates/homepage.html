@@ -94,7 +94,7 @@
                 {{ if .Authenticated }}
                     <div class="profile-box">
                         <h3>{{ if .User.Username }}{{ .User.Username }}{{ else }}Unknown User{{ end }}</h3>
-                        <p>Rank: {{ if .User.Rank }}{{ .User.Rank }}{{ else }}Unranked{{ end }} (LP: {{ .User.LP }})</p>
+                        <p>Rank: {{ if .User.Rank }}{{ .User.Rank }}{{ else }}Unranked{{ end }}</p>
                         <a href="/logout" class="logout-button">Log Out</a>
                     </div>
                 {{ else }}

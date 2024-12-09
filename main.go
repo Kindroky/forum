@@ -15,6 +15,7 @@ func main() {
 	// Set up routes
 	mux := http.NewServeMux()
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+	mux.HandleFunc("/post/", handlers.CommentPostHandler)
 	mux.HandleFunc("/register", handlers.Register)
 	mux.HandleFunc("/login", handlers.Login)
 	mux.HandleFunc("/logout", handlers.Logout)
