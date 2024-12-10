@@ -2,23 +2,38 @@ package handlers
 
 import (
 	"database/sql"
-	"fmt"
 	"forum/db"
+	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 )
 
-type Comment struct {
-    ID        int
-    UserID    int
-    Content   string
-    Author    string // Ajout de l'auteur
-    CreatedAt string // Ajout de la date de création
+type Post struct {
+	ID            int
+	Title         string
+	Content       string
+	Author        string
+	Category      string
+	UserID        string
+	CreatedAt     string
+	LikesCount    int
+	DislikesCount int
+	Comments      []Comment
+	User          User
 }
 
-func detailPostHandler(w http.ResponseWriter, r *http.Request) {
-	// Récupérer l'ID du post depuis les paramètres de l'URL
-	postIDStr := r.URL.Query().Get("postID")
+type Comment struct {
+	ID        int
+	UserID    int
+	Content   string
+	Author    string
+	CreatedAt string
+}
+
+func DetailPostHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the post ID from the query parameters
+	postIDStr := r.URL.Query().Get("id")
 	if postIDStr == "" {
 		http.Error(w, "Post ID is required", http.StatusBadRequest)
 		return
@@ -30,16 +45,16 @@ func detailPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Initialiser le modèle du post
+	// Initialize the post model
 	var post Post
 
-	// Récupérer les détails du post depuis la base de données
-	query := `SELECT posts.id, posts.title, posts.content, users.username, posts.created_at
+	// Retrieve post details from the database
+	query := `SELECT posts.id, posts.title, posts.content, users.username, posts.created_at, posts.likes_count, posts.dislikes_count
               FROM posts
               JOIN users ON posts.user_id = users.id
               WHERE posts.id = ?`
 	dbConn := db.GetDBConnection()
-	err = dbConn.QueryRow(query, postID).Scan(&post.ID, &post.Title, &post.Content, &post.Author, &post.CreatedAt)
+	err = dbConn.QueryRow(query, postID).Scan(&post.ID, &post.Title, &post.Content, &post.Author, &post.CreatedAt, &post.LikesCount, &post.DislikesCount)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Post not found", http.StatusNotFound)
@@ -49,20 +64,17 @@ func detailPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Récupérer les commentaires associés au post
+	// Retrieve comments associated with the post
 	rows, err := dbConn.Query(`
-    SELECT comments.id, comments.user_id, comments.content, users.username, comments.created_at
-    FROM comments
-    JOIN users ON comments.user_id = users.id
-    WHERE comments.post_id = ?
-    ORDER BY comments.created_at DESC
-`, postID)
-if err != nil {
-    http.Error(w, "Failed to fetch comments", http.StatusInternalServerError)
-    return
-}
-defer rows.Close()
-
+		SELECT comments.id, comments.user_id, comments.content, users.username, comments.created_at
+		FROM comments
+		JOIN users ON comments.user_id = users.id
+		WHERE comments.post_id = ?
+		ORDER BY comments.created_at ASC`, postID)
+	if err != nil {
+		http.Error(w, "Failed to fetch comments", http.StatusInternalServerError)
+		return
+	}
 	defer rows.Close()
 
 	for rows.Next() {
@@ -72,18 +84,19 @@ defer rows.Close()
 			return
 		}
 		post.Comments = append(post.Comments, comment)
-	}	
+	}
 
-	// Générer la réponse HTML (ou JSON)
-	// Si vous préférez générer du JSON, décommentez cette section :
-	// w.Header().Set("Content-Type", "application/json")
-	// json.NewEncoder(w).Encode(post)
+	// Render the detail post page
+	tmpl, err := template.ParseFiles("templates/detailpost.html")
+	if err != nil {
+		log.Printf("Error parsing detail post template: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 
-	// Sinon, générer une réponse HTML simple :
-	fmt.Fprintf(w, "<h1>%s</h1><p>%s</p><p><i>By %s on %s</i></p>",
-		post.Title, post.Content, post.Author, post.CreatedAt)
-	fmt.Fprintf(w, "<h2>Comments</h2>")
-	for _, comment := range post.Comments {
-		fmt.Fprintf(w, "<p><b>User %d:</b> %s <i>on %s</i></p>", comment.UserID, comment.Content, comment.CreatedAt)
+	err = tmpl.Execute(w, post)
+	if err != nil {
+		log.Printf("Template execution error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 }

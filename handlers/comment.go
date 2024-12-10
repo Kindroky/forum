@@ -1,34 +1,25 @@
 package handlers
 
 import (
-	"database/sql"
-	"errors"
 	"forum/db"
-	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
 
 func CommentPostHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		t, err := template.ParseFiles("templates/comment.html")
-		if err != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
-		}
-		t.Execute(w, nil)
-		return
-	}
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
 
-	userID := 1 // Replace with actual user session logic
+	userID := getSessionUserID(r)
+	if userID == 0 {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	postID := r.FormValue("postID")
 	comment := r.FormValue("comment")
-
 	if comment == "" {
 		http.Error(w, "Comment cannot be empty", http.StatusBadRequest)
 		return
@@ -41,41 +32,54 @@ func CommentPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	dbConn := db.GetDBConnection()
-	err = AddComment(userID, postIDInt, comment, dbConn)
+	_, err = dbConn.Exec(`
+		INSERT INTO comments (post_id, user_id, content, created_at)
+		VALUES (?, ?, ?, datetime('now'))`, postIDInt, userID, comment)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Error adding comment", http.StatusInternalServerError)
 		return
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	err = db.UpdateCommentsCount(postIDInt)
+	if err != nil {
+		http.Error(w, "Error updating comments count", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/detailpost?id="+postID, http.StatusSeeOther)
 }
 
-func AddComment(userID, postID int, comment string, db *sql.DB) error {
-	// Ensure user is registered
-	var userExists bool
-	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE id = ?)", userID).Scan(&userExists)
+func FetchComments(postID int) ([]Comment, error) {
+	dbConn := db.GetDBConnection()
+
+	// Query to fetch comments joined with user data
+	rows, err := dbConn.Query(`
+		SELECT comments.id, comments.user_id, comments.content, users.username, comments.created_at
+		FROM comments
+		JOIN users ON comments.user_id = users.id
+		WHERE comments.post_id = ?
+		ORDER BY comments.created_at ASC`, postID)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if !userExists {
-		return errors.New("user not registered")
+	defer rows.Close()
+
+	// Slice to store all comments
+	var comments []Comment
+	for rows.Next() {
+		var comment Comment
+		// Scan the row into the comment struct
+		err := rows.Scan(&comment.ID, &comment.UserID, &comment.Content, &comment.Author, &comment.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		comments = append(comments, comment)
 	}
 
-	// Ensure post exists
-	var postExists bool
-	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM posts WHERE id = ?)", postID).Scan(&postExists)
-	if err != nil {
-		return err
-	}
-	if !postExists {
-		return errors.New("post does not exist")
+	// Check for errors after iterating through rows
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 
-	// Insert comment into the Comments table
-	_, err = db.Exec("INSERT INTO comments (user_id, post_id, content, created_at) VALUES (?, ?, ?, datetime('now'))", userID, postID, comment)
-	if err != nil {
-		log.Printf("Error inserting comment: %v", err)
-		return err
-	}
-	return err
+	return comments, nil
 }

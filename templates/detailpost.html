@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }}</title>
+</head>
+<body>
+    <div class="post-container">
+        <h1>{{ .Title }}</h1>
+        <p>{{ .Content }}</p>
+        <p><i>By {{ .Author }} on {{ .CreatedAt }}</i></p>
+        <p>👍 {{ .LikesCount }} | 👎 {{ .DislikesCount }}</p>
+        <h2>Comments</h2>
+        {{ if .Comments }}
+            {{ range .Comments }}
+                <div class="comment">
+                    <p><b>{{ .Author }}</b> said:</p>
+                    <p>{{ .Content }}</p>
+                    <p><i>{{ .CreatedAt }}</i></p>
+                </div>
+            {{ end }}
+        {{ else }}
+            <p>No comments yet. Be the first to comment!</p>
+        {{ end }}
+    </div>
+</body>
+</html>

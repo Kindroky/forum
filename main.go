@@ -9,7 +9,6 @@ import (
 
 func main() {
 	// Initialize the database
-	//comment for checkpoint commit
 	dbConn := db.InitDB("db/forum.db")
 	defer dbConn.Close()
 
@@ -21,6 +20,9 @@ func main() {
 	mux.HandleFunc("/login", handlers.Login)
 	mux.HandleFunc("/logout", handlers.Logout)
 	mux.HandleFunc("/addpost", handlers.AddPost)
+	mux.HandleFunc("/like", handlers.LikePostHandler)
+	mux.HandleFunc("/comment", handlers.CommentPostHandler)
+	mux.HandleFunc("/detailpost", handlers.DetailPostHandler)
 	mux.HandleFunc("/", handlers.Homepage)
 
 	// Start the server

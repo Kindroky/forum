@@ -14,23 +14,20 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := 1 // Replace with actual user session logic
-	postID := r.FormValue("postID")
-	likeType := r.FormValue("likeType")
-
-	postIDInt, err := strconv.Atoi(postID)
-	if err != nil {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+	userID := getSessionUserID(r)
+	if userID == 0 {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	likeTypeInt, err := strconv.Atoi(likeType)
-	if err != nil || (likeTypeInt != 1 && likeTypeInt != -1) {
-		http.Error(w, "Invalid like type", http.StatusBadRequest)
+
+	postID, likeType, err := parseLikeRequest(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	dbConn := db.GetDBConnection()
-	err = HandleLikes(userID, postIDInt, likeTypeInt, dbConn)
+	err = handleLikeDislike(userID, postID, likeType, dbConn)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -39,44 +36,78 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func HandleLikes(userID, postID, likeType int, db *sql.DB) error {
-	// Ensure user is registered
-	var userExists bool
-	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE id = ?)", userID).Scan(&userExists)
+func parseLikeRequest(r *http.Request) (int, int, error) {
+	postID, err := strconv.Atoi(r.FormValue("postID"))
 	if err != nil {
-		return err
+		return 0, 0, errors.New("invalid post ID")
 	}
-	if !userExists {
-		return errors.New("user not registered")
+	likeType, err := strconv.Atoi(r.FormValue("likeType"))
+	if err != nil || (likeType != 1 && likeType != -1) {
+		return 0, 0, errors.New("invalid like type")
 	}
+	return postID, likeType, nil
+}
 
-	// Check if user has already liked/disliked this post
-	var exists bool
-	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM likes WHERE UserID = ? AND PostID = ?)", userID, postID).Scan(&exists)
-	if err != nil {
-		return err
-	}
-	if exists {
-		return errors.New("user has already liked or disliked this post")
-	}
-
-	// Insert like/dislike into the Likes table
-	_, err = db.Exec("INSERT INTO likes (UserID, PostID, LikeType) VALUES (?, ?, ?)", userID, postID, likeType)
-	if err != nil {
-		return err
-	}
-
-	// Update LP for the post owner
+func handleLikeDislike(userID, postID, likeType int, dbConn *sql.DB) error {
 	var postOwnerID int
-	err = db.QueryRow("SELECT user_id FROM posts WHERE id = ?", postID).Scan(&postOwnerID)
+	err := dbConn.QueryRow("SELECT user_id FROM posts WHERE id = ?", postID).Scan(&postOwnerID)
 	if err != nil {
 		return err
 	}
-
-	lpChange := 10
-	if likeType == -1 {
-		lpChange = -10
+	if postOwnerID == userID {
+		return errors.New("users cannot like or dislike their own posts")
 	}
-	_, err = db.Exec("UPDATE users SET LP = LP + ? WHERE id = ?", lpChange, postOwnerID)
-	return err
+
+	var existingLikeType int
+	err = dbConn.QueryRow(`
+		SELECT like_type FROM likes WHERE user_id = ? AND post_id = ?`,
+		userID, postID).Scan(&existingLikeType)
+
+	if err == sql.ErrNoRows {
+		// Add a new like/dislike
+		_, err = dbConn.Exec(`
+			INSERT INTO likes (user_id, post_id, like_type) VALUES (?, ?, ?)`,
+			userID, postID, likeType)
+		if err != nil {
+			return err
+		}
+		if likeType == 1 {
+			return db.UpdateLikesAndDislikes(postID, 1, 0)
+		}
+		return db.UpdateLikesAndDislikes(postID, 0, 1)
+	} else if err != nil {
+		return err
+	}
+
+	// Reaction exists; handle updates
+	if existingLikeType != likeType {
+		// Change the type of reaction (like -> dislike or dislike -> like)
+		_, err = dbConn.Exec(`
+			UPDATE likes SET like_type = ? WHERE user_id = ? AND post_id = ?`,
+			likeType, userID, postID)
+		if err != nil {
+			return err
+		}
+		if likeType == 1 {
+			return db.UpdateLikesAndDislikes(postID, 1, -1)
+		}
+		return db.UpdateLikesAndDislikes(postID, -1, 1)
+	}
+
+	// Reaction exists and matches; remove it
+	_, err = dbConn.Exec(`
+		DELETE FROM likes WHERE user_id = ? AND post_id = ?`,
+		userID, postID)
+	if err != nil {
+		return err
+	}
+	if likeType == 1 {
+		return db.UpdateLikesAndDislikes(postID, -1, 0)
+	}
+	return db.UpdateLikesAndDislikes(postID, 0, -1)
+}
+
+func getSessionUserID(r *http.Request) int {
+	// Replace with actual session logic
+	return 1
 }
