@@ -47,6 +47,7 @@
                 {{ if .Posts }}
                     {{ range .Posts }}
                         <div class="post">
+                            <a href="/detailpost?id={{.ID}}">
                             <!-- Post Header -->
                             <div class="post-header">
                                 <h2>{{ .Title }}</h2>
@@ -60,7 +61,7 @@
                             <div class="post-content">
                                 <p>{{ .Content }}</p>
                             </div>
-
+                        </a>
                             <!-- Post Footer -->
                             <hr class="post-divider">
                             <div class="post-footer">
