@@ -66,19 +66,19 @@
                             <div class="post-footer">
                                 <!-- Interaction Buttons -->
                                 {{ if $.Authenticated }}
-                                    <form action="/like" method="POST" class="like-form">
-                                        <input type="hidden" name="postID" value="{{ .ID }}">
-                                        <input type="hidden" name="likeType" value="1">
-                                        <button type="submit" class="like-button">👍 Like</button>
-                                    </form>
-                                    <form action="/like" method="POST" class="dislike-form">
-                                        <input type="hidden" name="postID" value="{{ .ID }}">
-                                        <input type="hidden" name="likeType" value="-1">
-                                        <button type="submit" class="dislike-button">👎 Dislike</button>
-                                    </form>
-                                    <button class="comment-button" onclick="window.location.href='/post/{{ .ID }}#comments'">💬 Comment</button>
+                                <form action="/like" method="POST" class="like-form">
+                                    <input type="hidden" name="postID" value="{{ .ID }}">
+                                    <input type="hidden" name="likeType" value="1">
+                                    <button type="submit" class="like-button">👍 Like</button>
+                                </form>
+                                <form action="/like" method="POST" class="dislike-form">
+                                    <input type="hidden" name="postID" value="{{ .ID }}">
+                                    <input type="hidden" name="likeType" value="-1">
+                                    <button type="submit" class="dislike-button">👎 Dislike</button>
+                                </form>
+                                <button class="comment-button" onclick="window.location.href='/post/{{ .ID }}#comments'">💬 Comment</button>
                                 {{ else }}
-                                    <p>Please <a href="/login">log in</a> to interact with posts.</p>
+                                <p>Please <a href="/login">log in</a> to interact with posts.</p>
                                 {{ end }}
                             </div>
                         </div>
