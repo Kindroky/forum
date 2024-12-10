@@ -16,7 +16,7 @@ func InitDB(dataSourceName string) *sql.DB {
 	if err != nil {
 		log.Fatalf("Erreur lors de l'ouverture de la base de données : %v", err)
 	}
-
+	CreateTables()
 	// Ensure the session_id column exists
 	ensureSessionIDColumn()
 

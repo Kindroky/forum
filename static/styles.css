@@ -202,3 +202,7 @@ header img {
 .like-button:hover, .dislike-button:hover, .comment-button:hover {
     background-color: #e0e0e0;
 }
+
+.post:hover {
+    background-color: grey;
+}

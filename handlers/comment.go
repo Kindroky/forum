@@ -1,10 +1,11 @@
 package handlers
 
 import (
-	"html/template"
 	"database/sql"
 	"errors"
 	"forum/db"
+	"html/template"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -71,6 +72,10 @@ func AddComment(userID, postID int, comment string, db *sql.DB) error {
 	}
 
 	// Insert comment into the Comments table
-	_, err = db.Exec("INSERT INTO comments (UserID, PostID, Comment, CreatedAt) VALUES (?, ?, ?, datetime('now'))", userID, postID, comment)
+	_, err = db.Exec("INSERT INTO comments (user_id, post_id, content, created_at) VALUES (?, ?, ?, datetime('now'))", userID, postID, comment)
+	if err != nil {
+		log.Printf("Error inserting comment: %v", err)
+		return err
+	}
 	return err
 }

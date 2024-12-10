@@ -112,7 +112,7 @@ func Homepage(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Error fetching user data: %v", err)
 		}
 	}
-
+	
 	// Fetch posts
 	posts, err := db.GetPosts()
 	if err != nil {
