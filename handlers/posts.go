@@ -133,7 +133,6 @@ func Homepage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 	}
 }
-
 func GetPosts() ([]Post, error) {
 	dbConn := db.GetDBConnection()
 
@@ -144,6 +143,8 @@ func GetPosts() ([]Post, error) {
 			posts.title, 
 			posts.content, 
 			posts.category, 
+			posts.likes_count, 
+			posts.dislikes_count, 
 			posts.user_id, 
 			users.username, 
 			CASE 
@@ -164,7 +165,7 @@ func GetPosts() ([]Post, error) {
 	for rows.Next() {
 		var post Post
 		var user User
-		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.UserID, &user.Username, &user.Rank, &user.LP)
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.LikesCount, &post.DislikesCount, &post.UserID, &user.Username, &user.Rank, &user.LP)
 		if err != nil {
 			log.Printf("Error scanning post data: %v", err)
 			return nil, err
@@ -175,7 +176,6 @@ func GetPosts() ([]Post, error) {
 
 	return posts, nil
 }
-
 func PostDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	// Extract the post ID from the URL query
 	postID := r.URL.Query().Get("id")
@@ -216,6 +216,8 @@ func PostDetailsHandler(w http.ResponseWriter, r *http.Request) {
 			posts.title, 
 			posts.content, 
 			posts.category, 
+			posts.likes_count, 
+			posts.dislikes_count, 
 			posts.user_id, 
 			users.username, 
 			CASE 
@@ -226,7 +228,8 @@ func PostDetailsHandler(w http.ResponseWriter, r *http.Request) {
 			users.LP
 		FROM posts
 		JOIN users ON posts.user_id = users.id
-		WHERE posts.id = ?`, postID).Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.UserID, &post.User.Username, &post.User.Rank, &post.User.LP)
+		WHERE posts.id = ?`, postID).Scan(
+		&post.ID, &post.Title, &post.Content, &post.Category, &post.LikesCount, &post.DislikesCount, &post.UserID, &post.User.Username, &post.User.Rank, &post.User.LP)
 	if err != nil {
 		log.Printf("Error fetching post: %v", err)
 		http.Error(w, "Post not found", http.StatusNotFound)
@@ -249,10 +252,9 @@ func PostDetailsHandler(w http.ResponseWriter, r *http.Request) {
 		Comments      []Comment
 	}{
 		Authenticated: authenticated,
-
-		User:     user,
-		Post:     post,
-		Comments: comments,
+		User:          user,
+		Post:          post,
+		Comments:      comments,
 	}
 
 	// Render the post details template
