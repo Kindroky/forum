@@ -159,7 +159,6 @@ func GetPosts() ([]Post, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
 	var posts []Post
 	for rows.Next() {
@@ -250,9 +249,10 @@ func PostDetailsHandler(w http.ResponseWriter, r *http.Request) {
 		Comments      []Comment
 	}{
 		Authenticated: authenticated,
-		User:          user,
-		Post:          post,
-		Comments:      comments,
+
+		User:     user,
+		Post:     post,
+		Comments: comments,
 	}
 
 	// Render the post details template

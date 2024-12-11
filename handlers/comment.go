@@ -52,7 +52,6 @@ func CommentPostHandler(w http.ResponseWriter, r *http.Request) {
 func FetchComments(postID int) ([]Comment, error) {
 	dbConn := db.GetDBConnection()
 
-	// Query to fetch comments joined with user data
 	rows, err := dbConn.Query(`
 		SELECT comments.id, comments.user_id, comments.content, users.username, comments.created_at
 		FROM comments
@@ -62,13 +61,10 @@ func FetchComments(postID int) ([]Comment, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	// Slice to store all comments
 	var comments []Comment
 	for rows.Next() {
 		var comment Comment
-		// Scan the row into the comment struct
 		err := rows.Scan(&comment.ID, &comment.UserID, &comment.Content, &comment.Author, &comment.CreatedAt)
 		if err != nil {
 			return nil, err
@@ -76,7 +72,6 @@ func FetchComments(postID int) ([]Comment, error) {
 		comments = append(comments, comment)
 	}
 
-	// Check for errors after iterating through rows
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}

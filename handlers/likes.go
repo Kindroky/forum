@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"forum/db"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -27,9 +28,18 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	dbConn := db.GetDBConnection()
+
 	err = handleLikeDislike(userID, postID, likeType, dbConn)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		// Check if the error is user-related (e.g., liking own post)
+		if err.Error() == "users cannot like or dislike their own posts" {
+			http.Error(w, "A user can't like their own posts. One has to go the hard way to earn LP, keep it up!", http.StatusForbidden)
+			return
+		}
+
+		// Log and respond with internal server error for unexpected issues
+		log.Printf("Error handling like/dislike: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
@@ -41,10 +51,12 @@ func parseLikeRequest(r *http.Request) (int, int, error) {
 	if err != nil {
 		return 0, 0, errors.New("invalid post ID")
 	}
+
 	likeType, err := strconv.Atoi(r.FormValue("likeType"))
 	if err != nil || (likeType != 1 && likeType != -1) {
 		return 0, 0, errors.New("invalid like type")
 	}
+
 	return postID, likeType, nil
 }
 
@@ -52,10 +64,12 @@ func handleLikeDislike(userID, postID, likeType int, dbConn *sql.DB) error {
 	var postOwnerID int
 	err := dbConn.QueryRow("SELECT user_id FROM posts WHERE id = ?", postID).Scan(&postOwnerID)
 	if err != nil {
+		log.Printf("Error fetching post owner: %v", err)
 		return err
 	}
 	if postOwnerID == userID {
-		return errors.New("users cannot like or dislike their own posts")
+		log.Println("User cannot like/dislike their own post")
+		return errors.New("users cannot like or dislke their own posts")
 	}
 
 	var existingLikeType int
@@ -64,7 +78,6 @@ func handleLikeDislike(userID, postID, likeType int, dbConn *sql.DB) error {
 		userID, postID).Scan(&existingLikeType)
 
 	if err == sql.ErrNoRows {
-		// Add a new like/dislike
 		_, err = dbConn.Exec(`
 			INSERT INTO likes (user_id, post_id, like_type) VALUES (?, ?, ?)`,
 			userID, postID, likeType)
@@ -79,9 +92,7 @@ func handleLikeDislike(userID, postID, likeType int, dbConn *sql.DB) error {
 		return err
 	}
 
-	// Reaction exists; handle updates
 	if existingLikeType != likeType {
-		// Change the type of reaction (like -> dislike or dislike -> like)
 		_, err = dbConn.Exec(`
 			UPDATE likes SET like_type = ? WHERE user_id = ? AND post_id = ?`,
 			likeType, userID, postID)
@@ -89,12 +100,11 @@ func handleLikeDislike(userID, postID, likeType int, dbConn *sql.DB) error {
 			return err
 		}
 		if likeType == 1 {
-			return db.UpdateLikesAndDislikes(postID, 1, -1)
+			return db.UpdateLikesAndDislikes(postID, 1, 1)
 		}
-		return db.UpdateLikesAndDislikes(postID, -1, 1)
+		return db.UpdateLikesAndDislikes(postID, -1, -1)
 	}
 
-	// Reaction exists and matches; remove it
 	_, err = dbConn.Exec(`
 		DELETE FROM likes WHERE user_id = ? AND post_id = ?`,
 		userID, postID)
@@ -104,10 +114,5 @@ func handleLikeDislike(userID, postID, likeType int, dbConn *sql.DB) error {
 	if likeType == 1 {
 		return db.UpdateLikesAndDislikes(postID, -1, 0)
 	}
-	return db.UpdateLikesAndDislikes(postID, 0, -1)
-}
-
-func getSessionUserID(r *http.Request) int {
-	// Replace with actual session logic
-	return 1
+	return db.UpdateLikesAndDislikes(postID, 0, 1)
 }

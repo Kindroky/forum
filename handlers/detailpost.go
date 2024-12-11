@@ -75,7 +75,6 @@ func DetailPostHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to fetch comments", http.StatusInternalServerError)
 		return
 	}
-	defer rows.Close()
 
 	for rows.Next() {
 		var comment Comment
