@@ -32,6 +32,5 @@ func getSessionUserID(r *http.Request) int {
 		return 0
 	}
 
-	log.Printf("Valid session for user ID: %d", userID)
 	return userID
 }

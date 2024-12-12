@@ -8,12 +8,6 @@ import (
 	"strings"
 )
 
-type HomepageData struct {
-	Authenticated bool
-	User          User
-	Posts         []Post
-}
-
 type User struct {
 	ID        int
 	Email     string
@@ -21,72 +15,6 @@ type User struct {
 	Password  string
 	LP        int
 	SessionID string
-}
-
-func AddPost(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		log.Println("No session cookie found.")
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	dbConn := db.GetDBConnection()
-	var user User
-	err = dbConn.QueryRow(`
-        SELECT id, username, LP, session_id 
-        FROM users WHERE session_id = ?`, cookie.Value).Scan(&user.ID, &user.Username, &user.LP, &user.SessionID)
-	if err != nil {
-		log.Printf("Error retrieving user from session: %v", err)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
-
-	if r.Method == http.MethodGet {
-		tmpl, err := template.ParseFiles("templates/addpost.html")
-		if err != nil {
-			log.Printf("Error parsing addpost template: %v", err)
-			http.Error(w, "Error loading page", http.StatusInternalServerError)
-			return
-		}
-		tmpl.Execute(w, nil)
-		return
-	}
-
-	if r.Method == http.MethodPost {
-		title := r.FormValue("title")
-		content := r.FormValue("content")
-		categories := r.Form["category"]
-
-		if title == "" || content == "" || len(categories) == 0 {
-			http.Error(w, "All fields are required", http.StatusBadRequest)
-			return
-		}
-
-		if len(categories) > 2 {
-			http.Error(w, "You can only select up to 2 categories", http.StatusBadRequest)
-			return
-		}
-
-		categoriesStr := strings.Join(categories, ",")
-
-		err := db.CreatePost(title, content, categoriesStr, user.ID)
-		if err != nil {
-			log.Printf("Error creating post: %v", err)
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
-		}
-
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-	}
-}
-
-func toAnySlice(strings []string) []any {
-	anySlice := make([]any, len(strings))
-	for i, v := range strings {
-		anySlice[i] = v
-	}
-	return anySlice
 }
 
 func GetPostsByCategory(categories []string) ([]Post, error) {
@@ -129,58 +57,6 @@ func GetPostsByCategory(categories []string) ([]Post, error) {
 		posts = append(posts, post)
 	}
 	return posts, nil
-}
-
-func Homepage(w http.ResponseWriter, r *http.Request) {
-	authenticated := false
-	var user User
-
-	cookie, err := r.Cookie("session_id")
-	if err == nil {
-		dbConn := db.GetDBConnection()
-		err = dbConn.QueryRow(`
-            SELECT id, username, LP, session_id 
-            FROM users WHERE session_id = ?`, cookie.Value).Scan(&user.ID, &user.Username, &user.LP, &user.SessionID)
-		if err == nil {
-			authenticated = true
-		} else {
-			log.Printf("Error fetching user data: %v", err)
-		}
-	}
-
-	categories := r.URL.Query()["category"]
-
-	var posts []Post
-	if len(categories) > 0 {
-		posts, err = GetPostsByCategory(categories)
-	} else {
-		posts, err = GetPosts()
-	}
-
-	if err != nil {
-		log.Printf("Error fetching posts: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	data := HomepageData{
-		Authenticated: authenticated,
-		User:          user,
-		Posts:         posts,
-	}
-
-	tmpl, err := template.ParseFiles("templates/homepage.html")
-	if err != nil {
-		log.Printf("Error parsing template: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	err = tmpl.Execute(w, data)
-	if err != nil {
-		log.Printf("Template execution error: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-	}
 }
 
 func GetPosts() ([]Post, error) {
