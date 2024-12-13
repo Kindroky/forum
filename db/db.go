@@ -3,7 +3,6 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"forum/models"
 	"log"
 	"strconv"
 
@@ -173,21 +172,4 @@ func UpdateCommentsCount(postID int) error {
 		SET comments_count = comments_count + 1
 		WHERE id = ?`, postID)
 	return err
-}
-
-func GetPostById(id string) (models.Post, error) {
-	dbConn := GetDBConnection()
-	post := &models.Post{}
-	err := dbConn.QueryRow(`SELECT posts.id, posts.title, posts.content, posts.created_at, users.id, users.username 
-		FROM posts
-		JOIN Users ON posts.user_id = users.ID
-		WHERE posts.id = ?`, id).Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt, &post.User.ID, &post.User.Username)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return *post, err
-		}
-		fmt.Printf("Error retrieving post: %v\n", err)
-		return *post, err
-	}
-	return *post, nil
 }

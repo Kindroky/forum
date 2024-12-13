@@ -77,7 +77,7 @@
                                         <input type="hidden" name="likeType" value="-1">
                                         <button type="submit" class="dislike-button">🔻 {{ .DislikesCount }}</button>
                                     </form>
-                                    <button class="comment-button" onclick="window.location.href='/post/?ID={{.ID}}'">💬 </button>
+                                    <button class="comment-button" onclick="window.location.href='/post/{{ .ID }}#comments'">💬 </button>
                                 {{ else }}
                                     <p>Please <a href="/login">log in</a> to interact with posts.</p>
                                 {{ end }}

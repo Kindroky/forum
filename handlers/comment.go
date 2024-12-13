@@ -1,10 +1,7 @@
 package handlers
 
 import (
-	"fmt"
 	"forum/db"
-	"forum/models"
-	"html/template"
 	"net/http"
 	"strconv"
 )
@@ -21,9 +18,8 @@ func CommentPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	postID := r.URL.Query().Get("ID")
+	postID := r.FormValue("postID")
 	comment := r.FormValue("comment")
-	fmt.Println(comment)
 	if comment == "" {
 		http.Error(w, "Comment cannot be empty", http.StatusBadRequest)
 		return
@@ -53,7 +49,7 @@ func CommentPostHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/detailpost?id="+postID, http.StatusSeeOther)
 }
 
-func FetchComments(postID int) ([]models.Comment, error) {
+func FetchComments(postID int) ([]Comment, error) {
 	dbConn := db.GetDBConnection()
 
 	rows, err := dbConn.Query(`
@@ -66,9 +62,9 @@ func FetchComments(postID int) ([]models.Comment, error) {
 		return nil, err
 	}
 
-	var comments []models.Comment
+	var comments []Comment
 	for rows.Next() {
-		var comment models.Comment
+		var comment Comment
 		err := rows.Scan(&comment.ID, &comment.UserID, &comment.Content, &comment.Author, &comment.CreatedAt)
 		if err != nil {
 			return nil, err
@@ -81,17 +77,4 @@ func FetchComments(postID int) ([]models.Comment, error) {
 	}
 
 	return comments, nil
-}
-
-func CommentFormHandler(w http.ResponseWriter, r *http.Request) {
-	postID := r.URL.Query().Get("ID")
-	post, err := db.GetPostById(postID)
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-	}
-	tmpl, err := template.ParseFiles("templates/comment.html")
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-	}
-	tmpl.Execute(w, post)
 }
