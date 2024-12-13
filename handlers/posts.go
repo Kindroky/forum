@@ -2,63 +2,12 @@ package handlers
 
 import (
 	"forum/db"
+	"forum/models"
 	"html/template"
 	"net/http"
-	"strings"
 )
 
-type User struct {
-	ID        int
-	Email     string
-	Username  string
-	Password  string
-	LP        int
-	SessionID string
-}
-
-func GetPostsByCategory(categories []string) ([]Post, error) {
-	dbConn := db.GetDBConnection()
-
-	// Build the query dynamically based on the number of categories
-	query := `
-		SELECT posts.id, posts.title, posts.content, posts.category, posts.likes_count, posts.dislikes_count, posts.user_id, users.username, users.LP 
-		FROM posts
-		JOIN users ON posts.user_id = users.id
-		WHERE `
-
-	conditions := make([]string, len(categories))
-	args := []any{}
-
-	for i, category := range categories {
-		conditions[i] = "category LIKE ?"
-		args = append(args, "%"+category+"%") // Add wildcard to match partial values
-	}
-
-	query += strings.Join(conditions, " OR ")
-	query += " ORDER BY posts.id DESC;"
-
-	// Execute the query
-	rows, err := dbConn.Query(query, args...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var posts []Post
-	for rows.Next() {
-		var post Post
-		var user User
-		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.LikesCount, &post.DislikesCount, &post.UserID, &user.Username, &user.LP)
-		if err != nil {
-			return nil, err
-		}
-		post.User = user
-		posts = append(posts, post)
-	}
-	return posts, nil
-}
-
-func GetPosts() ([]Post, error) {
+func GetPosts() ([]models.Post, error) {
 	dbConn := db.GetDBConnection()
 
 	rows, err := dbConn.Query(`
@@ -72,11 +21,11 @@ func GetPosts() ([]Post, error) {
 	}
 	defer rows.Close()
 
-	var posts []Post
+	var posts []models.Post
 	for rows.Next() {
-		var post Post
-		var user User
-		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.LikesCount, &post.DislikesCount, &post.UserID, &user.Username, &user.LP)
+		var post models.Post
+		var user models.User
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.LikesCount, &post.DislikesCount, &post.UserID, &user.Username, &user.Rank, &user.LP)
 		if err != nil {
 			return nil, err
 		}
@@ -95,7 +44,7 @@ func PostDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	authenticated := false
-	var user User
+	var user models.User
 
 	cookie, err := r.Cookie("session_id")
 	if err == nil {
@@ -109,7 +58,7 @@ func PostDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	dbConn := db.GetDBConnection()
-	var post Post
+	var post models.Post
 	err = dbConn.QueryRow(`
 		SELECT posts.id, posts.title, posts.content, posts.category, posts.likes_count, posts.dislikes_count, posts.user_id, users.username, users.LP 
 		FROM posts
@@ -128,9 +77,9 @@ func PostDetailsHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := struct {
 		Authenticated bool
-		User          User
-		Post          Post
-		Comments      []Comment
+		User          models.User
+		Post          models.Post
+		Comments      []models.Comment
 	}{
 		Authenticated: authenticated,
 		User:          user,

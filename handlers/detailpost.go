@@ -7,29 +7,8 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"forum/models"
 )
-
-type Post struct {
-	ID            int
-	Title         string
-	Content       string
-	Author        string
-	Category      string
-	UserID        string
-	CreatedAt     string
-	LikesCount    int
-	DislikesCount int
-	Comments      []Comment
-	User          User
-}
-
-type Comment struct {
-	ID        int
-	UserID    int
-	Content   string
-	Author    string
-	CreatedAt string
-}
 
 func DetailPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the post ID from the query parameters
@@ -46,7 +25,7 @@ func DetailPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Initialize the post model
-	var post Post
+	var post models.Post
 
 	// Retrieve post details from the database
 	query := `SELECT posts.id, posts.title, posts.content, users.username, posts.created_at, posts.likes_count, posts.dislikes_count
@@ -78,7 +57,7 @@ func DetailPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	defer rows.Close()
 	for rows.Next() {
-		var comment Comment
+		var comment models.Comment
 		if err := rows.Scan(&comment.ID, &comment.UserID, &comment.Content, &comment.Author, &comment.CreatedAt); err != nil {
 			Error(w, r, http.StatusInternalServerError, "An error occurred while reading comments.")
 			return
