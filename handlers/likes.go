@@ -47,12 +47,12 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 func parseLikeRequest(r *http.Request) (int, int, error) {
 	postID, err := strconv.Atoi(r.FormValue("postID"))
 	if err != nil {
-		return 0, 0, errors.New("invalid post ID")
+		return 0, 0, errors.New("Invalid post ID.")
 	}
 
 	likeType, err := strconv.Atoi(r.FormValue("likeType"))
 	if err != nil || (likeType != 1 && likeType != -1) {
-		return 0, 0, errors.New("invalid like type")
+		return 0, 0, errors.New("Invalid like type.")
 	}
 
 	return postID, likeType, nil
@@ -96,9 +96,9 @@ func handleLikeDislike(userID, postID, likeType int, dbConn *sql.DB) error {
 			return err
 		}
 		if likeType == 1 {
-			return db.UpdateLikesAndDislikes(postID, 1, -1)
+			return db.UpdateLikesAndDislikes(postID, 1, 1)
 		}
-		return db.UpdateLikesAndDislikes(postID, -1, 1)
+		return db.UpdateLikesAndDislikes(postID, -1, -1)
 	}
 
 	_, err = dbConn.Exec(`
