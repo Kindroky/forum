@@ -3,7 +3,6 @@ package handlers
 import (
 	"forum/db"
 	"html/template"
-	"log"
 	"net/http"
 )
 
@@ -25,8 +24,6 @@ func Homepage(w http.ResponseWriter, r *http.Request) {
             FROM users WHERE session_id = ?`, cookie.Value).Scan(&user.ID, &user.Username, &user.LP, &user.SessionID)
 		if err == nil {
 			authenticated = true
-		} else {
-			log.Printf("Error fetching user data: %v", err)
 		}
 	}
 
@@ -40,8 +37,7 @@ func Homepage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		log.Printf("Error fetching posts: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		Error(w, r, http.StatusInternalServerError, "An error occurred while fetching posts.")
 		return
 	}
 
@@ -53,14 +49,12 @@ func Homepage(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("templates/homepage.html")
 	if err != nil {
-		log.Printf("Error parsing template: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		Error(w, r, http.StatusInternalServerError, "An error occurred while loading the homepage.")
 		return
 	}
 
 	err = tmpl.Execute(w, data)
 	if err != nil {
-		log.Printf("Template execution error: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		Error(w, r, http.StatusInternalServerError, "An error occurred while rendering the homepage.")
 	}
 }

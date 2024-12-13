@@ -12,7 +12,7 @@ func AddPost(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
 		log.Println("No session cookie found.")
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		Error(w, r, http.StatusUnauthorized, "You need to log in to add a post.")
 		return
 	}
 
@@ -23,7 +23,7 @@ func AddPost(w http.ResponseWriter, r *http.Request) {
         FROM users WHERE session_id = ?`, cookie.Value).Scan(&user.ID, &user.Username, &user.LP, &user.SessionID)
 	if err != nil {
 		log.Printf("Error retrieving user from session: %v", err)
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		Error(w, r, http.StatusUnauthorized, "Invalid session. Please log in again.")
 		return
 	}
 
@@ -31,7 +31,7 @@ func AddPost(w http.ResponseWriter, r *http.Request) {
 		tmpl, err := template.ParseFiles("templates/addpost.html")
 		if err != nil {
 			log.Printf("Error parsing addpost template: %v", err)
-			http.Error(w, "Error loading page", http.StatusInternalServerError)
+			Error(w, r, http.StatusInternalServerError, "Error loading the Add Post page.")
 			return
 		}
 		tmpl.Execute(w, nil)
@@ -44,12 +44,12 @@ func AddPost(w http.ResponseWriter, r *http.Request) {
 		categories := r.Form["category"]
 
 		if title == "" || content == "" || len(categories) == 0 {
-			http.Error(w, "All fields are required", http.StatusBadRequest)
+			Error(w, r, http.StatusBadRequest, "All fields are required.")
 			return
 		}
 
 		if len(categories) > 2 {
-			http.Error(w, "You can only select up to 2 categories", http.StatusBadRequest)
+			Error(w, r, http.StatusBadRequest, "You can only select up to 2 categories.")
 			return
 		}
 
@@ -58,7 +58,7 @@ func AddPost(w http.ResponseWriter, r *http.Request) {
 		err := db.CreatePost(title, content, categoriesStr, user.ID)
 		if err != nil {
 			log.Printf("Error creating post: %v", err)
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			Error(w, r, http.StatusInternalServerError, "An error occurred while creating your post.")
 			return
 		}
 

@@ -35,13 +35,13 @@ func DetailPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the post ID from the query parameters
 	postIDStr := r.URL.Query().Get("id")
 	if postIDStr == "" {
-		http.Error(w, "Post ID is required", http.StatusBadRequest)
+		Error(w, r, http.StatusBadRequest, "Post ID is required.")
 		return
 	}
 
 	postID, err := strconv.Atoi(postIDStr)
 	if err != nil {
-		http.Error(w, "Invalid Post ID", http.StatusBadRequest)
+		Error(w, r, http.StatusBadRequest, "Invalid Post ID.")
 		return
 	}
 
@@ -57,9 +57,9 @@ func DetailPostHandler(w http.ResponseWriter, r *http.Request) {
 	err = dbConn.QueryRow(query, postID).Scan(&post.ID, &post.Title, &post.Content, &post.Author, &post.CreatedAt, &post.LikesCount, &post.DislikesCount)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			http.Error(w, "Post not found", http.StatusNotFound)
+			Error(w, r, http.StatusNotFound, "Post not found.")
 		} else {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			Error(w, r, http.StatusInternalServerError, "An error occurred while fetching the post.")
 		}
 		return
 	}
@@ -72,30 +72,36 @@ func DetailPostHandler(w http.ResponseWriter, r *http.Request) {
 		WHERE comments.post_id = ?
 		ORDER BY comments.created_at ASC`, postID)
 	if err != nil {
-		http.Error(w, "Failed to fetch comments", http.StatusInternalServerError)
+		Error(w, r, http.StatusInternalServerError, "Failed to fetch comments.")
 		return
 	}
 
+	defer rows.Close()
 	for rows.Next() {
 		var comment Comment
 		if err := rows.Scan(&comment.ID, &comment.UserID, &comment.Content, &comment.Author, &comment.CreatedAt); err != nil {
-			http.Error(w, "Error reading comments", http.StatusInternalServerError)
+			Error(w, r, http.StatusInternalServerError, "An error occurred while reading comments.")
 			return
 		}
 		post.Comments = append(post.Comments, comment)
+	}
+
+	if err = rows.Err(); err != nil {
+		Error(w, r, http.StatusInternalServerError, "An error occurred while processing comments.")
+		return
 	}
 
 	// Render the detail post page
 	tmpl, err := template.ParseFiles("templates/detailpost.html")
 	if err != nil {
 		log.Printf("Error parsing detail post template: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		Error(w, r, http.StatusInternalServerError, "An error occurred while loading the post page.")
 		return
 	}
 
 	err = tmpl.Execute(w, post)
 	if err != nil {
 		log.Printf("Template execution error: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		Error(w, r, http.StatusInternalServerError, "An error occurred while rendering the post page.")
 	}
 }

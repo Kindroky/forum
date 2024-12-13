@@ -3,7 +3,6 @@ package handlers
 import (
 	"forum/db"
 	"html/template"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -79,7 +78,6 @@ func GetPosts() ([]Post, error) {
 		var user User
 		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.LikesCount, &post.DislikesCount, &post.UserID, &user.Username, &user.LP)
 		if err != nil {
-			log.Printf("Error scanning post data: %v", err)
 			return nil, err
 		}
 		post.User = user
@@ -92,7 +90,7 @@ func GetPosts() ([]Post, error) {
 func PostDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	postID := r.URL.Query().Get("id")
 	if postID == "" {
-		http.Error(w, "Post ID is required", http.StatusBadRequest)
+		Error(w, r, http.StatusBadRequest, "Post ID is required.")
 		return
 	}
 
@@ -107,8 +105,6 @@ func PostDetailsHandler(w http.ResponseWriter, r *http.Request) {
 			FROM users WHERE session_id = ?`, cookie.Value).Scan(&user.ID, &user.Username, &user.LP, &user.SessionID)
 		if err == nil {
 			authenticated = true
-		} else {
-			log.Printf("Error fetching user data: %v", err)
 		}
 	}
 
@@ -120,15 +116,13 @@ func PostDetailsHandler(w http.ResponseWriter, r *http.Request) {
 		JOIN users ON posts.user_id = users.id
 		WHERE posts.id = ?`, postID).Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.LikesCount, &post.DislikesCount, &post.UserID, &post.User.Username, &post.User.LP)
 	if err != nil {
-		log.Printf("Error fetching post: %v", err)
-		http.Error(w, "Post not found", http.StatusNotFound)
+		Error(w, r, http.StatusNotFound, "Post not found.")
 		return
 	}
 
 	comments, err := FetchComments(post.ID)
 	if err != nil {
-		log.Printf("Error fetching comments: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		Error(w, r, http.StatusInternalServerError, "An error occurred while fetching comments.")
 		return
 	}
 
@@ -146,14 +140,12 @@ func PostDetailsHandler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles("templates/postdetails.html")
 	if err != nil {
-		log.Printf("Error parsing template: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		Error(w, r, http.StatusInternalServerError, "An error occurred while loading the post page.")
 		return
 	}
 
 	err = tmpl.Execute(w, data)
 	if err != nil {
-		log.Printf("Template execution error: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		Error(w, r, http.StatusInternalServerError, "An error occurred while rendering the post page.")
 	}
 }

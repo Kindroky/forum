@@ -4,26 +4,25 @@ import (
 	"database/sql"
 	"errors"
 	"forum/db"
-	"log"
 	"net/http"
 	"strconv"
 )
 
 func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		Error(w, r, http.StatusMethodNotAllowed, "Invalid request method.")
 		return
 	}
 
 	userID := getSessionUserID(r)
 	if userID == 0 {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		Error(w, r, http.StatusUnauthorized, "You must be logged in to like or dislike a post.")
 		return
 	}
 
 	postID, likeType, err := parseLikeRequest(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		Error(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -33,13 +32,12 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// Check if the error is user-related (e.g., liking own post)
 		if err.Error() == "users cannot like or dislike their own posts" {
-			http.Error(w, "A user can't like their own posts. One has to go the hard way to earn LP, keep it up!", http.StatusForbidden)
+			Error(w, r, http.StatusForbidden, "A user can't like their own posts. One has to go the hard way to earn LP, keep it up!")
 			return
 		}
 
 		// Log and respond with internal server error for unexpected issues
-		log.Printf("Error handling like/dislike: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		Error(w, r, http.StatusInternalServerError, "An unexpected error occurred while processing your request.")
 		return
 	}
 
@@ -49,12 +47,12 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 func parseLikeRequest(r *http.Request) (int, int, error) {
 	postID, err := strconv.Atoi(r.FormValue("postID"))
 	if err != nil {
-		return 0, 0, errors.New("invalid post ID")
+		return 0, 0, errors.New("Invalid post ID.")
 	}
 
 	likeType, err := strconv.Atoi(r.FormValue("likeType"))
 	if err != nil || (likeType != 1 && likeType != -1) {
-		return 0, 0, errors.New("invalid like type")
+		return 0, 0, errors.New("Invalid like type.")
 	}
 
 	return postID, likeType, nil
@@ -64,12 +62,10 @@ func handleLikeDislike(userID, postID, likeType int, dbConn *sql.DB) error {
 	var postOwnerID int
 	err := dbConn.QueryRow("SELECT user_id FROM posts WHERE id = ?", postID).Scan(&postOwnerID)
 	if err != nil {
-		log.Printf("Error fetching post owner: %v", err)
 		return err
 	}
 	if postOwnerID == userID {
-		log.Println("User cannot like/dislike their own post")
-		return errors.New("users cannot like or dislke their own posts")
+		return errors.New("users cannot like or dislike their own posts")
 	}
 
 	var existingLikeType int
@@ -114,5 +110,5 @@ func handleLikeDislike(userID, postID, likeType int, dbConn *sql.DB) error {
 	if likeType == 1 {
 		return db.UpdateLikesAndDislikes(postID, -1, 0)
 	}
-	return db.UpdateLikesAndDislikes(postID, 0, 1)
+	return db.UpdateLikesAndDislikes(postID, 0, -1)
 }
