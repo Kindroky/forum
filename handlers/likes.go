@@ -15,7 +15,7 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := getSessionUserID(r)
+	userID, _, _ := getSessionUserID(r)
 	if userID == 0 {
 		Error(w, r, http.StatusUnauthorized, "You must be logged in to like or dislike a post.")
 		return
@@ -31,13 +31,10 @@ func LikePostHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = handleLikeDislike(userID, postID, likeType, dbConn)
 	if err != nil {
-		// Check if the error is user-related (e.g., liking own post)
 		if err.Error() == "users cannot like or dislike their own posts" {
 			Error(w, r, http.StatusForbidden, "A user can't like their own posts. One has to go the hard way to earn LP, keep it up!")
 			return
 		}
-
-		// Log and respond with internal server error for unexpected issues
 		Error(w, r, http.StatusInternalServerError, "An unexpected error occurred while processing your request.")
 		return
 	}
@@ -68,10 +65,13 @@ func handleLikeDislike(userID, postID, likeType int, dbConn *sql.DB) error {
 	if postOwnerID == userID {
 		return errors.New("users cannot like or dislike their own posts")
 	}
+
 	var existingLikeType int
 	err = dbConn.QueryRow(`
 		SELECT like_type FROM likes WHERE user_id = ? AND post_id = ?`,
 		userID, postID).Scan(&existingLikeType)
+
+	// If no like/dislike exists
 	if err == sql.ErrNoRows {
 		_, err = dbConn.Exec(`
 			INSERT INTO likes (user_id, post_id, like_type) VALUES (?, ?, ?)`,
@@ -79,13 +79,20 @@ func handleLikeDislike(userID, postID, likeType int, dbConn *sql.DB) error {
 		if err != nil {
 			return err
 		}
+		// LP Logic
 		if likeType == 1 {
+			updateLP(postOwnerID, 1, dbConn)
+			updateLP(userID, 0.5, dbConn)
 			return UpdateLikesAndDislikes(postID, 1, 0)
 		}
+		updateLP(postOwnerID, -2, dbConn)
+		updateLP(userID, 0.5, dbConn)
 		return UpdateLikesAndDislikes(postID, 0, 1)
 	} else if err != nil {
 		return err
 	}
+
+	// If existing likeType is different, update it
 	if existingLikeType != likeType {
 		_, err = dbConn.Exec(`
 			UPDATE likes SET like_type = ? WHERE user_id = ? AND post_id = ?`,
@@ -94,10 +101,16 @@ func handleLikeDislike(userID, postID, likeType int, dbConn *sql.DB) error {
 			return err
 		}
 		if likeType == 1 {
+			updateLP(postOwnerID, 2, dbConn)
+			updateLP(userID, 0.5, dbConn)
 			return UpdateLikesAndDislikes(postID, 1, -1)
 		}
+		updateLP(postOwnerID, -2, dbConn)
+		updateLP(userID, 0.5, dbConn)
 		return UpdateLikesAndDislikes(postID, -1, 1)
 	}
+
+	// Undo like/dislike
 	_, err = dbConn.Exec(`
 		DELETE FROM likes WHERE user_id = ? AND post_id = ?`,
 		userID, postID)
@@ -105,11 +118,29 @@ func handleLikeDislike(userID, postID, likeType int, dbConn *sql.DB) error {
 		return err
 	}
 	if likeType == 1 {
+		updateLP(postOwnerID, -1, dbConn)
 		return UpdateLikesAndDislikes(postID, -1, 0)
 	}
+	updateLP(postOwnerID, 2, dbConn)
 	return UpdateLikesAndDislikes(postID, 0, -1)
 }
 
+// New LP Handling Function (from the first document)
+func updateLP(userID int, lpChange float64, dbConn *sql.DB) error {
+	var currentLP float64
+	err := dbConn.QueryRow("SELECT LP FROM users WHERE id = ?", userID).Scan(&currentLP)
+	if err != nil {
+		return err
+	}
+	newLP := currentLP + lpChange
+	if newLP < 0 {
+		newLP = 0 // Ensure LP cannot be negative
+	}
+	_, err = dbConn.Exec("UPDATE users SET LP = ? WHERE id = ?", int(newLP), userID)
+	return err
+}
+
+// Existing UpdateLikesAndDislikes Function
 func UpdateLikesAndDislikes(postID, likeChange, dislikeChange int) error {
 	db := db.GetDBConnection()
 	var likeCount, dislikeCount int

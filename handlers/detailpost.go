@@ -10,20 +10,6 @@ import (
 	"strconv"
 )
 
-type Post struct {
-	ID            int
-	Title         string
-	Content       string
-	Author        string
-	Category      string
-	UserID        string
-	CreatedAt     string
-	LikesCount    int
-	DislikesCount int
-	Comments      []models.Comment
-	User          models.User
-}
-
 func DetailPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Get the post ID from the query parameters
 	postIDStr := r.URL.Query().Get("id")
@@ -39,15 +25,16 @@ func DetailPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Initialize the post model
-	var post Post
+	var post models.Post
+	var user models.User
 
 	// Retrieve post details from the database
-	query := `SELECT posts.id, posts.title, posts.content, users.username, posts.created_at, posts.likes_count, posts.dislikes_count
+	query := `SELECT posts.id, posts.title, posts.content, posts.created_at, posts.likes_count, posts.dislikes_count, users.username, users.LP
               FROM posts
               JOIN users ON posts.user_id = users.id
               WHERE posts.id = ?`
 	dbConn := db.GetDBConnection()
-	err = dbConn.QueryRow(query, postID).Scan(&post.ID, &post.Title, &post.Content, &post.Author, &post.CreatedAt, &post.LikesCount, &post.DislikesCount)
+	err = dbConn.QueryRow(query, postID).Scan(&post.ID, &post.Title, &post.Content, &post.CreatedAt, &post.LikesCount, &post.DislikesCount, &user.Username, &user.LP)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			Error(w, r, http.StatusNotFound, "Post not found.")
@@ -68,6 +55,10 @@ func DetailPostHandler(w http.ResponseWriter, r *http.Request) {
 		Error(w, r, http.StatusInternalServerError, "Failed to fetch comments.")
 		return
 	}
+
+	// Assign the rank dynamically
+	user.Rank = getRank(user.LP)
+	post.User = user // Attach the user to the post
 
 	defer rows.Close()
 	for rows.Next() {

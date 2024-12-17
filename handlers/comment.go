@@ -14,30 +14,25 @@ func CommentPostHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
-
 	// Retrieve user session ID (to confirm the user is logged in)
-	userID := getSessionUserID(r)
+	userID, _, _ := getSessionUserID(r)
 	if userID == 0 {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-
 	// Extract post ID and comment from the form
 	postID := r.FormValue("ID")
 	comment := r.FormValue("comment")
-
 	if comment == "" {
 		http.Error(w, "Comment cannot be empty", http.StatusBadRequest)
 		return
 	}
-
 	// Convert postID to an integer
 	postIDInt, err := strconv.Atoi(postID)
 	if err != nil {
 		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
-
 	// Insert the comment into the database
 	dbConn := db.GetDBConnection()
 	_, err = dbConn.Exec(`
@@ -47,18 +42,15 @@ func CommentPostHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error adding comment", http.StatusInternalServerError)
 		return
 	}
-
 	// Update the comment count
 	err = db.UpdateCommentsCount(postIDInt)
 	if err != nil {
 		http.Error(w, "Error updating comments count", http.StatusInternalServerError)
 		return
 	}
-
 	// Redirect back to the detail post page
 	http.Redirect(w, r, "/detailpost?id="+postID, http.StatusSeeOther)
 }
-
 func FetchComments(postID int) ([]models.Comment, error) {
 	dbConn := db.GetDBConnection()
 	rows, err := dbConn.Query(`

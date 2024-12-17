@@ -7,16 +7,25 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <h1>{{.Title}}</h1>
-    <p>By: {{.Author}} | {{.CreatedAt}}</p>
-    <p>{{.Content}}</p>
+    <div class="post-container">
+        <h1>{{.Title}}</h1>
+        <p>{{.Content}}</p>
+        <p>
+            <i>By {{.User.Username}} 
+                (<span class="{{ if eq .User.Rank "Iron" }}rank-iron{{ else if eq .User.Rank "Bronze" }}rank-bronze{{ else if eq .User.Rank "Silver" }}rank-silver{{ end }}">
+                    {{.User.Rank}}
+                </span>)
+            on {{.CreatedAt}}</i>
+        </p>
+        <p>🔺 {{.LikesCount}} | 🔻 {{.DislikesCount}}</p>
+    </div>
 
     <!-- Comments Section -->
     <h2>Comments</h2>
     {{range .Comments}}
     <div class="comment">
         <p><strong>{{.Author}}</strong>: {{.Content}}</p>
-        <p>{{.CreatedAt}}</p>
+        <p><i>{{.CreatedAt}}</i></p>
 
         <!-- Like/Dislike Buttons -->
         <form action="/comlike" method="POST" style="display:inline;">

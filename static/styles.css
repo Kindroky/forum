@@ -5,27 +5,22 @@ body {
     padding: 0;
     background-color: #f9f9f9;
 }
-
 .container {
     padding: 20px;
 }
-
 header {
     text-align: center;
     margin-bottom: 10px;
 }
-
 header img {
     height: 80px;
 }
-
 .main-layout {
     display: flex;
     justify-content: space-between;
     width: 100%;
     column-gap: 50px; 
 }
-
 .sidebar {
     align-self: start;
     flex: 0 0 200px;
@@ -38,7 +33,6 @@ header img {
     height: 100vh;
     box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
 }
-
 .sidebar h3 {
     text-align: center;
     padding: 10px 0;
@@ -46,14 +40,12 @@ header img {
     color: #11492d;
     margin: 0;
 }
-
 .category-buttons {
     display: flex;
     flex-direction: column;
     gap: 10px;
     padding: 10px;
 }
-
 .category-buttons button {
     width: 100%;
     padding: 15px;
@@ -68,19 +60,16 @@ header img {
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
 .category-buttons button:hover {
     transform: translateY(-2px);
     box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.3);
 }
-
 /* Feed Styles */
 .feed {
     flex: 1;
     padding: 0 20px;
     max-width: 1200px;
 }
-
 .feed .welcome-message {
     text-align: center;
     font-weight: 600;
@@ -88,13 +77,11 @@ header img {
     font-style: italic;
     margin-bottom: 20px;
 }
-
 .profile-sidebar {
     flex: 0 0 100px;
     display: flex;
     align-items: center;
 }
-
 .profile-box {
     width: 200px;
     padding: 70px;
@@ -105,7 +92,6 @@ header img {
     font-family: Arial, sans-serif;
     color: #333;
 }
-
 .profile-box h3 {
     margin: 0;
     font-size: 22px;
@@ -113,7 +99,6 @@ header img {
     font-weight: bold;
     text-transform: uppercase;
 }
-
 .profile-box p {
     margin: 5px 0 0;
     font-size: 20px;
@@ -121,7 +106,6 @@ header img {
     font-weight: bold;
     text-transform: uppercase;
 }
-
 .home-icon {
     position: absolute; 
     top: 10px;          
@@ -129,20 +113,17 @@ header img {
     width: 120px;        
     height: 120px;       
 }
-
 .home-icon a {
     display: block; 
     width: 100%;    
     height: 100%;   
     text-decoration: none; 
 }
-
 .home-icon img {
     max-width: 100%;    
     max-height: 100%;
     object-fit: contain;
 }
-
 .post {
     border: 1px solid #ccc;
     border-radius: 8px;
@@ -157,25 +138,21 @@ header img {
     align-items: center;
     margin-bottom: 10px;
 }
-
 .post-header h2 {
     font-size: 1.5rem;
     margin: 0;
 }
-
 .post-user-info {
     text-align: right;
     font-size: 0.9rem;
     color: #555;
 }
-
 /* Post Content */
 .post-content {
     margin: 10px 0;
     font-size: 1.2rem;
     line-height: 1.5;
 }
-
 /* Post Footer */
 .post-divider {
     margin: 15px 0;
@@ -183,13 +160,11 @@ header img {
     height: 1px;
     background: #ddd;
 }
-
 .post-footer {
     display: flex;
     align-items: center;
     gap: 15px;
 }
-
 .like-button, .dislike-button, .comment-button {
     background-color: #f0f0f0;
     border: 1px solid #ccc;
@@ -198,11 +173,144 @@ header img {
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
-
 .like-button:hover, .dislike-button:hover, .comment-button:hover {
     background-color: #e0e0e0;
 }
-
 .post:hover {
-    background-color: grey;
+    background-color: #f0f0f0; /* Lighter hover effect */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Adds depth */
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.center-content {
+    max-width: 800px;
+    margin: 50px auto 0 auto; /* Add top margin of 50px */
+    padding: 20px;
+}
+h1.center-text {
+    font-size: 2rem;
+    color: #35420d; /* Matches the feed welcome message color */
+    text-align: center;
+    margin-bottom: 20px;
+}
+.no-posts-message {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #555;
+    margin-top: 20px;
+}
+.tabs-content {
+    margin-top: 10px; /* Shifts everything in the tab down */
+}
+.tabs-content .post {
+    max-width: 1200px; /* Narrower posts */
+    margin: 0 auto 20px auto; /* Center the posts and add spacing below */
+}
+.navigation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+.nav-button {
+    display: inline-block; /* Makes the button size fit the content */
+    padding: 10px 20px; /* Adjust padding for better spacing */
+    background-color: #DFBD69; /* Golden */
+    color: #0c2926; /* Turquoise */
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: center;
+    text-decoration: none; /* Remove underline from links */
+    cursor: pointer;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.3);
+}
+.post-button-container {
+    display: flex;
+    justify-content: center; /* Center the button horizontally */
+    align-items: center; /* Center content vertically (optional, for alignment) */
+    margin-top: 20px; /* Add spacing from the top (optional) */
+}
+.create-post-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* Space between image and text */
+    background-color: #b0fcf5; /* Turquoise */
+    color: #DFBD69; /* Golden */
+    border: none;
+    border-radius: 12px;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 15px 25px; /* Larger padding for a more prominent button */
+    cursor: pointer;
+    text-transform: uppercase;
+    text-shadow: -1px -1px 0 #b89f50, 1px -1px 0 #b89f50, -1px 1px 0 #b89f50, 1px 1px 0 #b89f50; /* Slightly darker golden outline */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.create-post-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.3);
+    background-color: #5dc2b9; /* Slightly darker turquoise on hover */
+}
+.create-post-button img {
+    height: 48px; /* Adjust icon size */
+    width: 48px;  /* Make sure it's square */
+    object-fit: contain; /* Keeps the aspect ratio of the image */
+}
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+/* Post User Info */
+.post-user-info {
+    text-align: right;
+    font-size: 0.9rem;
+    color: #555;
+}
+.post-user-info p:first-child {
+    font-weight: bold;
+    margin: 0;
+    color: #333;
+}
+.post-user-info p:nth-child(2) {
+    font-size: 0.8rem;
+    margin-top: 2px;
+    color: #777;
+}
+.rank-iron {
+    color: #a19d94; /* Ironish color */
+    font-weight: bold;
+}
+.rank-bronze {
+    color: #cd7f32; /* Bronze color */
+    font-weight: bold;
+}
+.rank-silver {
+    color: #c0c0c0; /* Silver color */
+    font-weight: bold;
+}
+.rank-display {
+    font-size: 1.5rem; /* Larger font size */
+    font-weight: bold; /* Make text bold */
+    margin-top: 10px; /* Add some spacing */
+}
+.rank-highlight {
+    font-size: 1.8rem; /* Even larger font for rank value */
+    font-weight: bold;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3); /* Subtle shadow for effect */
+}
+.lp-display {
+    margin: 5px 0;
+    font-size: 1.2rem;
+    color: #666; /* Grey for LP to give contrast */
 }

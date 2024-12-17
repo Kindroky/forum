@@ -147,57 +147,6 @@ func CreateTables() {
 	log.Println("Database tables initialized successfully.")
 }
 
-func UpdateLikesAndDislikes(postID, likeChange, dislikeChange int) error {
-	db := GetDBConnection()
-	var likeCount, dislikeCount int
-
-	// Fetch current counts
-	err := db.QueryRow("SELECT likes_count, dislikes_count FROM posts WHERE id=?", postID).Scan(&likeCount, &dislikeCount)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	// Update counts
-	likeCount += likeChange
-	dislikeCount += dislikeChange
-	_, err = db.Exec("UPDATE posts SET likes_count = ?, dislikes_count = ? WHERE id=?", likeCount, dislikeCount, postID)
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-	return nil
-}
-
-func UpdateComLikesAndDislikes(commentID, comlikeChange, comdislikeChange int) error {
-	db := GetDBConnection()
-
-	// Fetch current counts
-	var comLikesCount, comDislikesCount int
-	err := db.QueryRow("SELECT comlikes_count, comdislikes_count FROM comments WHERE id=?", commentID).
-		Scan(&comLikesCount, &comDislikesCount)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return fmt.Errorf("comment not found")
-		}
-		fmt.Println("Error fetching comment counts:", err)
-		return err
-	}
-
-	// Increment the counts
-	comLikesCount += comlikeChange
-	comDislikesCount += comdislikeChange
-
-	// Update the counts
-	_, err = db.Exec("UPDATE comments SET comlikes_count = ?, comdislikes_count = ? WHERE id=?", comLikesCount, comDislikesCount, commentID)
-	if err != nil {
-		fmt.Println("Error updating comment counts:", err)
-		return err
-	}
-
-	return nil
-}
-
 func CreatePost(title, content, category string, userID int) error {
 	_, err := database.Exec(`
 		INSERT INTO posts (title, content, category, user_id, created_at)

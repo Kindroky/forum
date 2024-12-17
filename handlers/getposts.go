@@ -5,29 +5,13 @@ import (
 	"fmt"
 	"forum/db"
 	"forum/models"
-	"log"
 	"strings"
 )
 
-func GetPosts() ([]Post, error) {
+func GetPosts() ([]models.Post, error) {
 	dbConn := db.GetDBConnection()
-	// Query to join posts and users table
 	rows, err := dbConn.Query(`
-		SELECT 
-			posts.id, 
-			posts.title, 
-			posts.content, 
-			posts.category, 
-			posts.likes_count, 
-			posts.dislikes_count, 
-			posts.user_id, 
-			users.username, 
-			CASE 
-				WHEN users.LP >= 100 THEN 'Legend' 
-				WHEN users.LP >= 50 THEN 'Pro' 
-				ELSE 'Novice' 
-			END AS rank, 
-			users.LP
+		SELECT posts.id, posts.title, posts.content, posts.category, posts.likes_count, posts.dislikes_count, posts.user_id, users.username, users.LP 
 		FROM posts
 		JOIN users ON posts.user_id = users.id
 		ORDER BY posts.id DESC;
@@ -35,16 +19,20 @@ func GetPosts() ([]Post, error) {
 	if err != nil {
 		return nil, err
 	}
-	var posts []Post
+	defer rows.Close()
+
+	var posts []models.Post
 	for rows.Next() {
-		var post Post
+		var post models.Post
 		var user models.User
-		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.LikesCount, &post.DislikesCount, &post.UserID, &user.Username, &user.Rank, &user.LP)
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.LikesCount, &post.DislikesCount, &post.UserID, &user.Username, &user.LP)
 		if err != nil {
-			log.Printf("Error scanning post data: %v", err)
 			return nil, err
 		}
+		// Rank calculation integrated
+		user.Rank = getRank(user.LP)
 		post.User = user
+		post.Rank = user.Rank
 		posts = append(posts, post)
 	}
 	return posts, nil
@@ -67,37 +55,96 @@ func GetPostById(id string) (models.Post, error) {
 	return *post, nil
 }
 
-func GetPostsByCategory(categories []string) ([]Post, error) {
+func GetPostsByCategory(categories []string) ([]models.Post, error) {
 	dbConn := db.GetDBConnection()
-	// Build the query dynamically based on the number of categories
 	query := `
-		SELECT posts.id, posts.title, posts.content, posts.category, posts.likes_count, posts.dislikes_count, posts.user_id, users.username, users.LP 
-		FROM posts
-		JOIN users ON posts.user_id = users.id
-		WHERE `
+        SELECT posts.id, posts.title, posts.content, posts.category, posts.likes_count, posts.dislikes_count, posts.user_id, users.username, users.LP
+        FROM posts
+        JOIN users ON posts.user_id = users.id
+        WHERE `
 	conditions := make([]string, len(categories))
 	args := []any{}
 	for i, category := range categories {
 		conditions[i] = "category LIKE ?"
-		args = append(args, "%"+category+"%") // Add wildcard to match partial values
+		args = append(args, "%"+category+"%")
 	}
 	query += strings.Join(conditions, " OR ")
 	query += " ORDER BY posts.id DESC;"
-	// Execute the query
+
 	rows, err := dbConn.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var posts []Post
+
+	var posts []models.Post
 	for rows.Next() {
-		var post Post
+		var post models.Post
 		var user models.User
 		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.LikesCount, &post.DislikesCount, &post.UserID, &user.Username, &user.LP)
 		if err != nil {
 			return nil, err
 		}
+		// Rank calculation integrated
+		user.Rank = getRank(user.LP)
 		post.User = user
+		post.Rank = user.Rank
+		posts = append(posts, post)
+	}
+	return posts, nil
+}
+
+func GetLikedPosts(userID int) ([]models.Post, error) {
+	dbConn := db.GetDBConnection()
+	query := `
+        SELECT posts.id, posts.title, posts.content, posts.category, posts.likes_count, posts.dislikes_count, posts.user_id, users.username, users.LP, posts.created_at
+        FROM likes
+        JOIN posts ON likes.post_id = posts.id
+        JOIN users ON posts.user_id = users.id
+        WHERE likes.user_id = ? AND likes.like_type = 1
+        ORDER BY posts.created_at DESC;
+    `
+	rows, err := dbConn.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []models.Post
+	for rows.Next() {
+		var post models.Post
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.LikesCount, &post.DislikesCount, &post.UserID, &post.User.Username, &post.User.LP, &post.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+	return posts, nil
+}
+
+// GetCreatedPosts retrieves posts created by the user.
+func GetCreatedPosts(userID int) ([]models.Post, error) {
+	dbConn := db.GetDBConnection()
+	query := `
+        SELECT posts.id, posts.title, posts.content, posts.category, posts.likes_count, posts.dislikes_count, posts.user_id, users.username, users.LP, posts.created_at
+        FROM posts
+        JOIN users ON posts.user_id = users.id
+        WHERE posts.user_id = ?
+        ORDER BY posts.created_at DESC;
+    `
+	rows, err := dbConn.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []models.Post
+	for rows.Next() {
+		var post models.Post
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Category, &post.LikesCount, &post.DislikesCount, &post.UserID, &post.User.Username, &post.User.LP, &post.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
 		posts = append(posts, post)
 	}
 	return posts, nil

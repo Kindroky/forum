@@ -8,23 +8,29 @@
 </head>
 <body>
     <div class="container">
+        <!-- Header Section -->
         <header>
             <img src="/static/FoL-Logo.png" alt="Forum Name">
             <div class="post-button-container">
-                <!-- Conditional Create Post Button -->
                 {{ if .Authenticated }}
-                    <button onclick="window.location.href='/addpost'" class="post-button">Create Post</button>
+                    <button onclick="window.location.href='/addpost'" class="create-post-button">
+                        <img src="/static/challenger.png" alt="Create Icon"> Create Post
+                    </button>
                 {{ else }}
-                    <button onclick="window.location.href='/login'" class="post-button">Log In to Create Post</button>
+                    <button onclick="window.location.href='/login'" class="create-post-button">
+                        <img src="/static/challenger.png" alt="Log In Icon"> Log In to Create Post
+                    </button>
                 {{ end }}
             </div>
-        </header>
-        <main class="main-layout">
-            <div class="home-icon">
-                <a href="/">
-                    <img src="/static/FoL-ICON.png" alt="Forum Icon">
-                </a>
+            <!-- Navigation Buttons -->
+            <div class="navigation-buttons">
+                <a href="/likedposts" class="nav-button">Liked Posts</a>
+                <a href="/createdposts" class="nav-button">Created Posts</a>
             </div>
+        </header>
+
+        <!-- Main Layout -->
+        <main class="main-layout">
             <!-- Sidebar for Categories -->
             <aside class="sidebar">
                 <h3>Categories</h3>
@@ -33,36 +39,47 @@
                     <button onclick="window.location.href='/?category=champs'">Champs</button>
                     <button onclick="window.location.href='/?category=meta'">Meta</button>
                     <button onclick="window.location.href='/?category=events'">Events</button>
-                </div>
+                </div>                
             </aside>
-            
-            <!-- Feed Content -->
+
+            <!-- Home Icon -->
+            <div class="home-icon">
+                <a href="/">
+                    <img src="/static/FoL-ICON.png" alt="Forum Icon">
+                </a>
+            </div>
+
+            <!-- Feed Section -->
             <section class="feed">
                 <div class="welcome-message">
                     Welcome to the land of totally unbiased takes. Become a legend and share your 200 IQ meta predictions and champion sob stories! Theory craft some questionable builds or dissect events like you're a pro analyst! The community is ready to agree, or flame you once again...
                 </div>
-                <!-- Render posts below the welcome message -->
+
+                <!-- Render Posts -->
                 {{ if .Posts }}
                     {{ range .Posts }}
                         <div class="post">
                             <a href="/detailpost?id={{.ID}}">
-                            <!-- Post Header -->
-                            <div class="post-header">
-                                <h2>{{ .Title }}</h2>
-                                <div class="post-user-info">
-                                    <p><strong>{{ if .User.Username }}{{ .User.Username }}{{ else }}Unknown User{{ end }}</strong></p>
-                                    <p>Rank: {{ if .User.Rank }}{{ .User.Rank }}{{ else }}Unranked{{ end }}</p>
+                                <!-- Post Header -->
+                                <div class="post-header">
+                                    <h2>{{ .Title }}</h2>
+                                    <div class="post-user-info">
+                                        <p><strong>{{ if .User.Username }}{{ .User.Username }}{{ else }}Unknown User{{ end }}</strong></p>
+                                        <p>Rank: 
+                                            <span class="rank-highlight {{ if eq .User.Rank "Iron" }}rank-iron{{ else if eq .User.Rank "Bronze" }}rank-bronze{{ else if eq .User.Rank "Silver" }}rank-silver{{ end }}">
+                                                {{ if .User.Rank }}{{ .User.Rank }}{{ else }}Unranked{{ end }}
+                                            </span>
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                            <!-- Post Content -->
-                            <div class="post-content">
-                                <p>{{ .Content }}</p>
-                            </div>
-                        </a>
+                                <!-- Post Content -->
+                                <div class="post-content">
+                                    <p>{{ .Content }}</p>
+                                </div>
+                            </a>
                             <!-- Post Footer -->
                             <hr class="post-divider">
                             <div class="post-footer">
-                                <!-- Interaction Buttons -->
                                 {{ if $.Authenticated }}
                                     <form action="/like" method="POST" class="like-form">
                                         <input type="hidden" name="postID" value="{{ .ID }}">
@@ -85,13 +102,18 @@
                     <p>No posts available. Be the first to create one!</p>
                 {{ end }}
             </section>
+
             <!-- Profile Sidebar -->
             <aside class="profile-sidebar">
-                <!-- User Profile -->
                 {{ if .Authenticated }}
                     <div class="profile-box">
                         <h3>{{ if .User.Username }}{{ .User.Username }}{{ else }}Unknown User{{ end }}</h3>
-                        <p>Rank: {{ if .User.Rank }}{{ .User.Rank }}{{ else }}Unranked{{ end }}</p>
+                        <p class="lp-display">LP: {{ .User.LP }}</p>
+                        <p class="rank-display">Rank: 
+                            <span class="rank-highlight {{ if eq .User.Rank "Iron" }}rank-iron{{ else if eq .User.Rank "Bronze" }}rank-bronze{{ else if eq .User.Rank "Silver" }}rank-silver{{ end }}">
+                                {{ .User.Rank }}
+                            </span>
+                        </p>
                         <a href="/logout" class="logout-button">Log Out</a>
                     </div>
                 {{ else }}

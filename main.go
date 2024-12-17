@@ -21,6 +21,8 @@ func main() {
 	mux.HandleFunc("/comment", handlers.CommentPostHandler)
 	mux.HandleFunc("/detailpost", handlers.DetailPostHandler)
 	mux.HandleFunc("/comlike", handlers.ComLikePostHandler)
+	mux.HandleFunc("/likedposts", handlers.LikedPostsHandler)
+	mux.HandleFunc("/createdposts", handlers.CreatedPostsHandler)
 	mux.HandleFunc("/", handlers.Homepage)
 	defer db.CloseDB()
 	log.Println("Server running at http://localhost:8080")

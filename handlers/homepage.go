@@ -7,12 +7,6 @@ import (
 	"net/http"
 )
 
-type HomepageData struct {
-	Authenticated bool
-	User          models.User
-	Posts         []Post
-}
-
 func Homepage(w http.ResponseWriter, r *http.Request) {
 	authenticated := false
 	var user models.User
@@ -25,12 +19,13 @@ func Homepage(w http.ResponseWriter, r *http.Request) {
             FROM users WHERE session_id = ?`, cookie.Value).Scan(&user.ID, &user.Username, &user.LP, &user.SessionID)
 		if err == nil {
 			authenticated = true
+			user.Rank = getRank(user.LP) // Calculate and assign rank based on LP
 		}
 	}
 
 	categories := r.URL.Query()["category"]
 
-	var posts []Post
+	var posts []models.Post
 	if len(categories) > 0 {
 		posts, err = GetPostsByCategory(categories)
 	} else {
@@ -42,7 +37,7 @@ func Homepage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := HomepageData{
+	data := models.HomepageData{
 		Authenticated: authenticated,
 		User:          user,
 		Posts:         posts,

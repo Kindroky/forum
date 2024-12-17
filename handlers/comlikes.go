@@ -15,7 +15,7 @@ func ComLikePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID := getSessionUserID(r)
+	userID, _, _ := getSessionUserID(r)
 	if userID == 0 {
 		Error(w, r, http.StatusUnauthorized, "You must be logged in to like or dislike a comment.")
 		return

@@ -11,6 +11,7 @@ type Post struct {
 	LikesCount    int
 	DislikesCount int
 	Comments      []Comment
+	Rank          string
 	User          User
 }
 
