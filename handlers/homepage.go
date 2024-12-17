@@ -2,19 +2,20 @@ package handlers
 
 import (
 	"forum/db"
+	"forum/models"
 	"html/template"
 	"net/http"
 )
 
 type HomepageData struct {
 	Authenticated bool
-	User          User
+	User          models.User
 	Posts         []Post
 }
 
 func Homepage(w http.ResponseWriter, r *http.Request) {
 	authenticated := false
-	var user User
+	var user models.User
 
 	cookie, err := r.Cookie("session_id")
 	if err == nil {

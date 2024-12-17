@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"forum/db"
+	"forum/models"
 	"html/template"
 	"log"
 	"net/http"
@@ -17,7 +18,7 @@ func AddPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	dbConn := db.GetDBConnection()
-	var user User
+	var user models.User
 	err = dbConn.QueryRow(`
         SELECT id, username, LP, session_id 
         FROM users WHERE session_id = ?`, cookie.Value).Scan(&user.ID, &user.Username, &user.LP, &user.SessionID)

@@ -20,6 +20,12 @@
             </div>
         </header>
         <main class="main-layout">
+            <div class="home-icon">
+                <a href="/">
+                    <img src="/static/FoL-ICON.png" alt="Forum Icon">
+                </a>
+            </div>
+            <!-- Sidebar for Categories -->
             <aside class="sidebar">
                 <h3>Categories</h3>
                 <div class="category-buttons">
@@ -27,22 +33,14 @@
                     <button onclick="window.location.href='/?category=champs'">Champs</button>
                     <button onclick="window.location.href='/?category=meta'">Meta</button>
                     <button onclick="window.location.href='/?category=events'">Events</button>
-                </div>                
+                </div>
             </aside>
-            
-            <div class="home-icon">
-                <a href="/">
-                    <img src="/static/FoL-ICON.png" alt="Forum Icon">
-                </a>
-            </div>
-            
             
             <!-- Feed Content -->
             <section class="feed">
                 <div class="welcome-message">
                     Welcome to the land of totally unbiased takes. Become a legend and share your 200 IQ meta predictions and champion sob stories! Theory craft some questionable builds or dissect events like you're a pro analyst! The community is ready to agree, or flame you once again...
                 </div>
-
                 <!-- Render posts below the welcome message -->
                 {{ if .Posts }}
                     {{ range .Posts }}
@@ -53,10 +51,9 @@
                                 <h2>{{ .Title }}</h2>
                                 <div class="post-user-info">
                                     <p><strong>{{ if .User.Username }}{{ .User.Username }}{{ else }}Unknown User{{ end }}</strong></p>
-                                    <p>Rank: Novice</p>
+                                    <p>Rank: {{ if .User.Rank }}{{ .User.Rank }}{{ else }}Unranked{{ end }}</p>
                                 </div>
                             </div>
-
                             <!-- Post Content -->
                             <div class="post-content">
                                 <p>{{ .Content }}</p>
@@ -77,7 +74,7 @@
                                         <input type="hidden" name="likeType" value="-1">
                                         <button type="submit" class="dislike-button">🔻 {{ .DislikesCount }}</button>
                                     </form>
-                                    <button class="comment-button" onclick="window.location.href='/post/{{ .ID }}#comments'">💬 </button>
+                                    <button class="comment-button" onclick="window.location.href='/post/?ID={{.ID}}'">💬 </button>
                                 {{ else }}
                                     <p>Please <a href="/login">log in</a> to interact with posts.</p>
                                 {{ end }}
@@ -88,14 +85,13 @@
                     <p>No posts available. Be the first to create one!</p>
                 {{ end }}
             </section>
-
             <!-- Profile Sidebar -->
             <aside class="profile-sidebar">
                 <!-- User Profile -->
                 {{ if .Authenticated }}
                     <div class="profile-box">
                         <h3>{{ if .User.Username }}{{ .User.Username }}{{ else }}Unknown User{{ end }}</h3>
-                        <p>Rank: Novice</p>
+                        <p>Rank: {{ if .User.Rank }}{{ .User.Rank }}{{ else }}Unranked{{ end }}</p>
                         <a href="/logout" class="logout-button">Log Out</a>
                     </div>
                 {{ else }}

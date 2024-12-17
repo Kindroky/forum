@@ -3,26 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ .Title }}</title>
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <div class="post-container">
-        <h1>{{ .Title }}</h1>
-        <p>{{ .Content }}</p>
-        <p><i>By {{ .Author }} on {{ .CreatedAt }}</i></p>
-        <p>🔺 {{ .LikesCount }} | 🔻 {{ .DislikesCount }}</p>
-        <h2>Comments</h2>
-        {{ if .Comments }}
-            {{ range .Comments }}
-                <div class="comment">
-                    <p><b>{{ .Author }}</b> said:</p>
-                    <p>{{ .Content }}</p>
-                    <p><i>{{ .CreatedAt }}</i></p>
-                </div>
-            {{ end }}
-        {{ else }}
-            <p>No comments yet. Be the first to comment!</p>
-        {{ end }}
+    <h1>{{.Title}}</h1>
+    <p>By: {{.Author}} | {{.CreatedAt}}</p>
+    <p>{{.Content}}</p>
+
+    <!-- Comments Section -->
+    <h2>Comments</h2>
+    {{range .Comments}}
+    <div class="comment">
+        <p><strong>{{.Author}}</strong>: {{.Content}}</p>
+        <p>{{.CreatedAt}}</p>
+
+        <!-- Like/Dislike Buttons -->
+        <form action="/comlike" method="POST" style="display:inline;">
+            <input type="hidden" name="commentID" value="{{.ID}}">
+            <input type="hidden" name="comlikeType" value="1">
+            <button type="submit">🔺 {{ .ComLikesCount }}</button>
+        </form>
+        
+        <form action="/comlike" method="POST" style="display:inline;">
+            <input type="hidden" name="commentID" value="{{.ID}}">
+            <input type="hidden" name="comlikeType" value="-1">
+            <button type="submit">🔻 {{ .ComDislikesCount }}</button>
+        </form>        
     </div>
+    <hr>
+    {{else}}
+    <p>No comments yet. Be the first to comment!</p>
+    {{end}}
+
+    <!-- Add a Comment -->
+    <h3>Add a Comment</h3>
+    <form action="/comment" method="POST">
+        <input type="hidden" name="ID" value="{{.ID}}">
+        <textarea name="comment" rows="4" cols="50" placeholder="Write your comment here..." required></textarea><br>
+        <button type="submit">Submit Comment</button>
+    </form>
 </body>
 </html>

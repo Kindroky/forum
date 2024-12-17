@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"forum/db"
+	"forum/models"
 	"html/template"
 	"log"
 	"net/http"
@@ -19,16 +20,8 @@ type Post struct {
 	CreatedAt     string
 	LikesCount    int
 	DislikesCount int
-	Comments      []Comment
-	User          User
-}
-
-type Comment struct {
-	ID        int
-	UserID    int
-	Content   string
-	Author    string
-	CreatedAt string
+	Comments      []models.Comment
+	User          models.User
 }
 
 func DetailPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +59,7 @@ func DetailPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Retrieve comments associated with the post
 	rows, err := dbConn.Query(`
-		SELECT comments.id, comments.user_id, comments.content, users.username, comments.created_at
+		SELECT comments.id, comments.user_id, comments.content, users.username, comments.created_at, comments.comlikes_count, comments.comdislikes_count
 		FROM comments
 		JOIN users ON comments.user_id = users.id
 		WHERE comments.post_id = ?
@@ -78,8 +71,16 @@ func DetailPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	defer rows.Close()
 	for rows.Next() {
-		var comment Comment
-		if err := rows.Scan(&comment.ID, &comment.UserID, &comment.Content, &comment.Author, &comment.CreatedAt); err != nil {
+		var comment models.Comment
+		if err := rows.Scan(
+			&comment.ID,
+			&comment.UserID,
+			&comment.Content,
+			&comment.Author,
+			&comment.CreatedAt,
+			&comment.ComLikesCount,
+			&comment.ComDislikesCount,
+		); err != nil {
 			Error(w, r, http.StatusInternalServerError, "An error occurred while reading comments.")
 			return
 		}
@@ -91,17 +92,18 @@ func DetailPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Render the detail post page
+	// Parse and render the template
 	tmpl, err := template.ParseFiles("templates/detailpost.html")
 	if err != nil {
 		log.Printf("Error parsing detail post template: %v", err)
-		Error(w, r, http.StatusInternalServerError, "An error occurred while loading the post page.")
+		http.Error(w, "An error occurred while loading the post page.", http.StatusInternalServerError)
 		return
 	}
 
 	err = tmpl.Execute(w, post)
 	if err != nil {
 		log.Printf("Template execution error: %v", err)
-		Error(w, r, http.StatusInternalServerError, "An error occurred while rendering the post page.")
+		http.Error(w, "An error occurred while rendering the post page.", http.StatusInternalServerError)
+		return
 	}
 }
