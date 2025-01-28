@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FoL</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/home.css">
 </head>
 <body>
     <div class="container">
@@ -24,9 +24,9 @@
             </div>
             <!-- Navigation Buttons -->
             <div class="navigation-buttons">
-                <a href="/likedposts" class="nav-button">Liked Posts</a>
-                <a href="/createdposts" class="nav-button">Created Posts</a>
-            </div>
+                <a href="/likedposts" class="navigation-button1">Liked Posts</a>
+                <a href="/createdposts" class="navigation-button2">Created Posts</a>
+            </div>            
         </header>
 
         <!-- Main Layout -->
@@ -64,8 +64,11 @@
                                 <div class="post-header">
                                     <h2>{{ .Title }}</h2>
                                     <div class="post-user-info">
-                                        <p><strong>{{ if .User.Username }}{{ .User.Username }}{{ else }}Unknown User{{ end }}</strong></p>
-                                        <p>Rank: 
+                                        <p class="username">
+                                            <strong>{{ if .User.Username }}{{ .User.Username }}{{ else }}Unknown User{{ end }}</strong>
+                                        </p>
+                                        <p class="rank">
+                                            Rank: 
                                             <span class="rank-highlight {{ if eq .User.Rank "Iron" }}rank-iron{{ else if eq .User.Rank "Bronze" }}rank-bronze{{ else if eq .User.Rank "Silver" }}rank-silver{{ end }}">
                                                 {{ if .User.Rank }}{{ .User.Rank }}{{ else }}Unranked{{ end }}
                                             </span>

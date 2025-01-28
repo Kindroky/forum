@@ -1,0 +1,44 @@
+/*Gneral style*/ 
+html {
+    background-image: url('/static/defeat.png');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: -50px 100px; /* Move the image slightly to the left */
+    color: black;
+    font-family: 'Times New Roman', Times, serif;
+}
+body {
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent white for better readability */
+    margin: 0;
+    padding: 2rem;
+}
+h1, p {
+    font-size: 3rem;
+    text-shadow: 
+        1px 1px 0px white, 
+        -1px -1px 0px white, 
+        -1px 1px 0px white, 
+        1px -1px 0px white;
+}
+p {
+    font-size: 1.5rem;
+}
+.home-icon {
+    position: absolute; 
+    top: 10px;          
+    left: 10px;         
+    width: 120px;        
+    height: 120px;       
+}
+.home-icon a {
+    display: block; 
+    width: 100%;    
+    height: 100%;   
+    text-decoration: none; 
+}
+.home-icon img {
+    max-width: 100%;    
+    max-height: 100%;
+    object-fit: contain;
+}

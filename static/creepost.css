@@ -1,0 +1,101 @@
+@font-face {
+    font-family: 'PF DIN Text';
+    src: url('/static/font/PFDINTextPro-Regular-subset.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Load PF DIN Text Bold */
+@font-face {
+    font-family: 'PF DIN Text';
+    src: url('/static/font/PFDINTextPro-Bold-subset.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+body {
+    background-image: url('/static/ausol.png');
+    background-size: cover; /* Ensure the image covers the whole page */
+    background-repeat: no-repeat; /* Prevent image tiling */
+    background-position: center; /* Center the image */
+    background-attachment: fixed; /* Fixed background on scroll */
+    margin: 0; /* Remove default margin */
+    font-family: 'PF DIN Text', sans-serif; /* Apply PF DIN Text */
+    color: #333; /* Default text color for contrast */
+}
+
+/* Center the content in a container */
+.container {
+    max-width: 600px; /* Limit the content width */
+    margin: 100px auto; /* Center the container vertically and horizontally */
+    background: rgba(255, 255, 255, 0.8); /* Slight white background for contrast */
+    padding: 30px;
+    border-radius: 8px; /* Add rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
+    font-family: 'PF DIN Text', sans-serif; /* Apply PF DIN Text here */
+}
+
+/* Add a heading style */
+h1 {
+    text-align: center;
+    text-size-adjust: 25px;
+    color: #00AFFF;
+    font-family: 'PF DIN Text', sans-serif;
+    font-weight: bold; /* Use the bold font */
+    margin-bottom: 20px;
+    text-shadow: 
+    -1px -1px 0 white,  
+    1px -1px 0 white,  
+    -1px 1px 0 white,  
+    1px 1px 0 white;
+}
+
+/* Style the form fields */
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-family: 'PF DIN Text', sans-serif;
+    font-weight: bold; /* Make labels bold */
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: 'PF DIN Text', sans-serif;
+    font-size: 14px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #5a67d8; /* A clean, modern blue */
+    color: white;
+    border: 2px solid white; /* White outline */
+    border-radius: 5px;
+    font-size: 16px;
+    font-family: 'PF DIN Text', sans-serif;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+button:hover {
+    background-color: #434190;
+    border-color: #cccccc;
+}
+
+input[type="text"],    
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: 'PF DIN Text', sans-serif;
+    font-size: 14px;
+    margin-left: -10px; /* Move the boxes 10px to the left */
+... (44lignes restantes)
