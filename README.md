@@ -24,6 +24,9 @@ The website includes a ranking system (inspired by the LoL's system to rank play
 
 A logged user can, at any time, check their created and liked posts using a special tab in the homepage, to keep track of their activity and the posts they found interesting.
 
+### Full Responsiveness
+The forum was designed with full responsiveness in mind. A **hamburger menu** was implemented entirely in **HTML and CSS**, as the use of JavaScript was prohibited for this project. The hamburger menu becomes available exclusively on mobile screens, replacing the profile sidebar present on larger displays. This ensures a smooth and user-friendly experience across all devices.
+
 ## How to use it 
 
 The long-term goal of this project might be to let the website running at all time allowing a real community to build around it. But for now, using it requires you to download the project and to run it yourself using a software such as Visual Code Studio, and you'll probably be the only user online. 
