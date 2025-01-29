@@ -1,39 +1,162 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: url("details-back.jpg") no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* Blurred Content Container */
 .all {
-    background-image: url(JINXJTM.jpg);
-    background-size: 100%;
+    position: relative;
     align-self: center;
-    border-radius: 8px;
+    border-radius: 15px;
     font-size: large;
     width: 50%;
-    position: absolute;
-    left: 25%;
-    top: 20%;
     padding: 20px;
+    margin: 50px auto;
+    background: rgba(54, 53, 53, 0.548); /* Semi-transparent black for readability */
+    backdrop-filter: blur(10px); /* Adds a blur effect */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     color: white;
+    overflow: hidden;
 }
 
 .home-icon {
-    position: absolute; 
-    top: 10px;          
-    left: 10px;         
-    width: 120px;        
-    height: 120px;       
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 120px;
+    height: 120px;
 }
-.home-icon a {
-    display: block; 
-    width: 100%;    
-    height: 100%;   
-    text-decoration: none; 
-}
+
 .home-icon img {
-    max-width: 100%;    
+    max-width: 100%;
     max-height: 100%;
     object-fit: contain;
 }
+
+/* Header Section */
 header {
-    text-align: center;
-    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: transparent;
+    box-shadow: none;
+    padding: 1% 10%;
+    gap: 1.5%;
+    margin-top: 0;
 }
+
 header img {
-    height: 80px;
+    height: 100px;
+    cursor: pointer;
+}
+
+/* Post Title */
+.title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #ff4500;
+    text-align: center;
+}
+
+/* Post Content */
+.content {
+    font-size: 22px;
+    line-height: 1.8;
+    margin-bottom: 20px;
+    text-align: justify;
+    color: #f7f2c9;
+}
+
+/* Meta Information */
+.meta {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 10px;
+    text-align: right;
+}
+
+/* Comments Section */
+.comment {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    color: #f0f0f0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.comment strong {
+    color: #ff4500;
+}
+
+.comment i {
+    font-size: 15px;
+    color: #aaa;
+}
+
+/* Like/Dislike Buttons */
+.comment button {
+    background: none;
+    border: none;
+    color: #6192ee;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: color 0.3s ease;
+}
+
+.comment button:hover {
+    color: #e63900;
+}
+
+/* Back Button */
+.back-button {
+    display: block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #ff4500;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    cursor: pointer;
+    margin-left: 0px;
+    transition: background-color 0.3s ease;
+    width: 180px;
+    font-weight: 600;
+}
+
+.back-button:hover {
+    background-color: #e63900;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .all {
+        width: 90%;
+        padding: 15px;
+    }
+
+    .title {
+        font-size: 24px;
+    }
+
+    .content {
+        font-size: 16px;
+    }
+
+    .home-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .comment {
+        font-size: 14px;
+    }
 }

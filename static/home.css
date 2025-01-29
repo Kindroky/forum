@@ -206,7 +206,6 @@ header img {
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    text-transform: uppercase;
     width: 200px;
     height: 65px;
 }
@@ -234,7 +233,6 @@ header img {
     font-weight: bold;
     cursor: pointer;
     text-align: center;
-    text-transform: uppercase;
     text-decoration: none;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
