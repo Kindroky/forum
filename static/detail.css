@@ -99,24 +99,26 @@ header img {
     color: #aaa;
 }
 
-/* Like/Dislike Buttons */
-.comment button {
-    background: none;
-    border: none;
-    color: #6192ee;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-right: 10px;
-    transition: color 0.3s ease;
+.rank-iron {
+    color: #53422c;
+    background-color: rgb(161, 157, 148);
+    border: 1px solid #523a03;
 }
 
-.comment button:hover {
-    color: #e63900;
+.rank-bronze {
+    color: #cd7f32;
+    background-color: rgb(205, 128, 50);
+    border: 1px solid #cd7f32;
+}
+
+.rank-silver {
+    color: #838383;
+    background-color: rgb(77, 69, 69);
+    border: 1px solid #c0c0c0;
 }
 
 /* Back Button */
-.back-button {
+.submit-button {
     display: block;
     padding: 10px 20px;
     font-size: 16px;
