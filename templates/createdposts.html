@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{.User.Username}}'s Created Posts</title>
+  <link rel="stylesheet" href="/static/creepost.css">
+</head>
+<body>
+  <div class="home-icon">
+    <a href="/">
+      <img src="/static/FoL-ICON.png" alt="Forum Icon">
+    </a>
+  </div>
+  <header>
+    <img src="/static/FoL-Logo.png" alt="Forum Name">
+  </header>
+  <div class="tabs-content">
+    <div class="center-content">
+    <h1 class="center-text">Created Posts</h1>
+  </div>
+    
+    <div class="posts-container">
+      {{if .Posts}}
+        {{range .Posts}}
+          <div class="post">
+            <a href="/detailpost?id={{.ID}}">
+              <!-- Post Header -->
+              <div class="post-header">
+                <h2>{{.Title}}</h2>
+                <div class="post-user-info">
+                  <p><strong>{{ if .User.Username }}{{ .User.Username }}{{ else }}Unknown User{{ end }}</strong></p>
+                  <span class="{{ if eq .User.Rank "Iron" }}rank-iron{{ else if eq .User.Rank "Bronze" }}rank-bronze{{ else if eq .User.Rank "Silver" }}rank-silver{{ end }}">
+                    {{ .User.Rank }}
+                </span>
+                </div>
+              </div>
+
+              <!-- Post Content -->
+              <div class="post-content">
+                <p>{{.Content}}</p>
+              </div>
+            </a>
+            <!-- Post Footer -->
+            <hr class="post-divider">
+            <div class="post-footer">
+              <p>Category: {{.Category}}</p>
+              <p>Likes: {{.LikesCount}} | Dislikes: {{.DislikesCount}}</p>
+              <p>Posted by: {{.User.Username}} on {{.CreatedAt}}</p>
+            </div>
+          </div>
+        {{end}}
+      {{else}}
+        <p class="center-text">You haven't created any posts yet.</p>
+      {{end}}
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/error.css">
+    <title>Error {{.CodeErr}}</title>
+    <style>
+        html {
+            background-image: url('/static/defeat.png');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: -50px 100px; /* Move the image slightly to the left */
+            color: black;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        body {
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent white for better readability */
+            margin: 0;
+            padding: 2rem;
+        }
+        h1, p {
+            font-size: 3rem;
+            text-shadow: 
+                1px 1px 0px white, 
+                -1px -1px 0px white, 
+                -1px 1px 0px white, 
+                1px -1px 0px white;
+        }
+        p {
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Error {{.CodeErr}}</h1>
+    <p>{{.MessageErr}}</p>
+    <div class="home-icon">
+        <a href="/">
+            <img src="/static/FoL-ICON.png" alt="Forum Icon">
+        </a>
+    </div>
+</body>
+</html>
