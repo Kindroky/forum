@@ -4,33 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Post</title>
-    <link rel="stylesheet" href="/static/createstatic.css">
+    <link rel="stylesheet" href="/static/createpost.css">
 </head>
 <body>
+    <!-- Home Icon -->
+    <div class="home-icon">
+        <a href="/">
+            <img src="/static/FoL-ICON.png" alt="Forum Icon">
+        </a>
+    </div>
+
+    <!-- Site Logo -->
+    <div class="site-logo">
+        <img src="/static/FoL-Logo.png" alt="Forum Name">
+    </div>
+
+    <!-- Container -->
     <div class="container">
         <header>
             <h1>Create a New Post</h1>
         </header>
         <main>
             <form action="/addpost" method="POST">
+                <!-- Title -->
                 <label for="title">Title:</label>
                 <input type="text" id="title" name="title" required>
             
+                <!-- Content -->
                 <label for="content">Content:</label>
                 <textarea id="content" name="content" required></textarea>
             
+                <!-- Categories -->
                 <label>Categories (Select up to 2):</label>
-                <div>
-                    <label><input type="checkbox" name="category" value="items"> Items</label>
-                    <label><input type="checkbox" name="category" value="champs"> Champs</label>
-                    <label><input type="checkbox" name="category" value="meta"> Meta</label>
-                    <label><input type="checkbox" name="category" value="events"> Events</label>
+                <div class="category-container">
+                    <input type="checkbox" id="items" name="category" value="items" class="hidden-checkbox">
+                    <label for="items" class="category-label">Items</label>
+
+                    <input type="checkbox" id="champs" name="category" value="champs" class="hidden-checkbox">
+                    <label for="champs" class="category-label">Champs</label>
+
+                    <input type="checkbox" id="meta" name="category" value="meta" class="hidden-checkbox">
+                    <label for="meta" class="category-label">Meta</label>
+
+                    <input type="checkbox" id="events" name="category" value="events" class="hidden-checkbox">
+                    <label for="events" class="category-label">Events</label>
                 </div>
             
-                <button type="submit">Create Post</button>
+                <!-- Submit Button -->
+                <button type="submit" class="create-post-button">Create Post</button>
             </form>            
         </main>
     </div>
 </body>
 </html>
-
