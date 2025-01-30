@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>{{.User.Username}}'s Liked Posts</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/likedposts.css">
 </head>
 <body>
   <!-- Home Icon -->
@@ -15,12 +15,9 @@
     <img src="/static/FoL-Logo.png" alt="Forum Name">
   </header>
   <!-- Page Content -->
-  <div class="tabs-content">
-    <div class="center-content">
-      <h1 class="center-text">Liked Posts</h1>
-    </div>
-    
+  <div class="tabs-content">   
     <div class="posts-container">
+      <div class="liked-posts-title">Liked Posts</div>
       {{if .Posts}}
         {{range .Posts}}
           <div class="post">

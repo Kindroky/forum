@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>{{.User.Username}}'s Created Posts</title>
-  <link rel="stylesheet" href="/static/creepost.css">
+  <link rel="stylesheet" href="/static/createdposts.css">
 </head>
 <body>
   <div class="home-icon">
@@ -15,10 +15,9 @@
   </header>
   <div class="tabs-content">
     <div class="center-content">
-    <h1 class="center-text">Created Posts</h1>
   </div>
-    
     <div class="posts-container">
+      <h1 class="created-posts-title">Created Posts</h1>
       {{if .Posts}}
         {{range .Posts}}
           <div class="post">

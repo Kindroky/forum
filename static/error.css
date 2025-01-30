@@ -1,29 +1,25 @@
-/*Gneral style*/ 
-html {
-    background-image: url('/static/defeat.png');
-    background-size: cover;
-    background-attachment: fixed;
-    background-position: -50px 100px; /* Move the image slightly to the left */
-    color: black;
-    font-family: 'Times New Roman', Times, serif;
-}
 body {
     text-align: center;
-    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent white for better readability */
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white for better readability */
     margin: 0;
     padding: 2rem;
+    background: url("error.jpg") no-repeat center center fixed;
+    background-size: cover;
+    background-attachment: fixed;
+    font-family: 'Roboto';
 }
-h1, p {
-    font-size: 3rem;
-    text-shadow: 
-        1px 1px 0px white, 
-        -1px -1px 0px white, 
-        -1px 1px 0px white, 
-        1px -1px 0px white;
+h1 {
+    font-size: 50px;
+    color: rgba(255, 239, 239, 0.893);
+    font-weight: 700;
 }
-p {
-    font-size: 1.5rem;
+
+.error-message {
+    font-size: 30px;
+    color: rgba(255, 224, 224, 0.7);
+    font-weight: 470;
 }
+
 .home-icon {
     position: absolute; 
     top: 10px;          
