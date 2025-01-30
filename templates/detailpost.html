@@ -4,34 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Title}}</title>
-    <link rel="stylesheet" href="/static/home.css">
     <link rel="stylesheet" href="/static/detail.css">
-    <link rel="Icon" href="/static/LogoP.png"type="image/png">
 </head>
 <body>
-    <header>
-    <img src="/static/FoL-Logo.png" alt="Forum Name">
-    </header>
-    <div class="home-icon">
-        <a href="/">
-            <img src="/static/FoL-ICON.png" alt="Forum Icon">
-        </a>
-    </div>
-    <div class="all">
     <div class="post-container">
-        <h1 class="title">{{.Title}}</h1>
-        <p class="meta">By {{.User.Username}} (<span class="{{ if eq .User.Rank "Iron" }}rank-iron{{ else if eq .User.Rank "Bronze" }}rank-bronze{{ else if eq .User.Rank "Silver" }}rank-silver{{ end }}">
-            {{.User.Rank}} </span>) on {{.CreatedAt}}</p>
-        <div class="content">{{.Content}}</div>
+        <h1>{{.Title}}</h1>
+        <p>{{.Content}}</p>
+        <p>
+            <i>By {{.User.Username}} 
+                (<span class="{{ if eq .User.Rank "Iron" }}rank-iron{{ else if eq .User.Rank "Bronze" }}rank-bronze{{ else if eq .User.Rank "Silver" }}rank-silver{{ end }}">
+                    {{.User.Rank}}
+                </span>)
+            on {{.CreatedAt}}</i>
+        </p>
         <p>🔺 {{.LikesCount}} | 🔻 {{.DislikesCount}}</p>
     </div>
+
     <!-- Comments Section -->
-    <hr class="post-divider">
     <h2>Comments</h2>
     {{range .Comments}}
     <div class="comment">
         <p><strong>{{.Author}}</strong>: {{.Content}}</p>
         <p><i>{{.CreatedAt}}</i></p>
+
         <!-- Like/Dislike Buttons -->
         <form action="/comlike" method="POST" style="display:inline;">
             <input type="hidden" name="commentID" value="{{.ID}}">
@@ -49,13 +44,13 @@
     {{else}}
     <p>No comments yet. Be the first to comment!</p>
     {{end}}
+
     <!-- Add a Comment -->
     <h3>Add a Comment</h3>
     <form action="/comment" method="POST">
         <input type="hidden" name="ID" value="{{.ID}}">
         <textarea name="comment" rows="4" cols="50" placeholder="Write your comment here..." required></textarea><br>
-        <button type="submit" class="submit-button">Submit Comment</button>
+        <button type="submit">Submit Comment</button>
     </form>
-</div>
 </body>
 </html>
