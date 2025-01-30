@@ -274,7 +274,7 @@ header img {
 }
 
 .post-header h2 {
-    font-size: 18px;
+    font-size: 22px;
     font-weight: bold;
     color: #234f6a;
 }
@@ -327,6 +327,15 @@ header img {
     color: #838383;
     background-color: rgba(192, 192, 192, 0.1);
     border: 1px solid #c0c0c0;
+}
+
+/* Post Content */
+.post-content {
+    margin: 10px 0;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+    color: black;
 }
 
 /* Post Footer */
