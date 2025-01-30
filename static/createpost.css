@@ -1,0 +1,164 @@
+body {
+    background-image: url('/static/1.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+    margin: 0, auto;
+    font-family: 'Roboto';
+    color: #D4AF37;
+    font-size: 17px;
+    font-weight: 600;
+    image-rendering: high-quality;
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Ensures spacing between the home icon and the logo */
+    padding: 10px 20px;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Home Icon */
+.home-icon {
+    position: relative; 
+    width: clamp(60px, 10vw, 120px); 
+    height: clamp(60px, 10vw, 120px); 
+    flex-shrink: 0; 
+}
+
+.home-icon img {
+    max-width: 100%; 
+    max-height: 100%; 
+    object-fit: contain; 
+}
+
+/* Site Logo - Keeps it at the top */
+.site-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1; /* Ensures it takes up available space */
+    position: absolute;
+    top: 10px; /* Ensures it stays near the top */
+    left: 50%;
+    transform: translateX(-50%); /* Centers the logo perfectly */
+}
+
+/* Keep Logo Size Responsive */
+.site-logo img {
+    height: clamp(50px, 8vw, 100px); /* Adjust height based on screen size */
+    cursor: pointer;
+}
+
+.container {
+    max-width: 500px;
+    margin: 1px auto;
+    background: #04295999;
+    padding: 1px 25px 20px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-family: 'Roboto';
+}
+
+h1 {
+    text-align: center;
+    font-size: 30px;
+    color: #D4AF37;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input {
+    width: 98%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+textarea {
+    width: 98%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    resize: vertical;
+    max-height: 2000px;
+    min-height: 90px;
+}
+
+.create-post-button {
+    display: block;
+    padding: 10px 20px;
+    font-size: 20px;
+    color: #022656;
+    background-color: #dbb94b;
+    border: none;
+    border-radius: 7px;
+    text-decoration: none;
+    cursor: pointer;
+    margin: 18px auto; /* Centering the button */
+    transition: background-color 0.3s ease;
+    width: 200px;
+    font-weight: 675;
+}
+
+button:hover {
+    background-color: #022656; 
+    border-color: #e7c5ff;
+    color: #dbb94b;
+}
+
+/* Categories */
+.hidden-checkbox {
+    display: none;
+}
+
+.category-container {
+    display: flex;
+    flex-wrap: nowrap; /* Prevent wrapping to the next line */
+    justify-content: center; /* Center all buttons horizontally */
+    gap: 20px; /* Add spacing between buttons */
+    padding: 10px; /* Add padding inside the container */
+}
+
+.category-label {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 7px 16px;
+    font-size: 16px; /* Slightly larger font size */
+    font-weight: 650;
+    background-color: #89afda; /* Maintain background color */
+    color: #252d87;
+    border-radius: 10px; /* Rounded corners for a modern look */
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    user-select: none;
+    text-align: center;
+}
+
+.category-label:hover {
+    background-color: #3769a6fd; /* Brighter hover effect */
+    color: #252d87; /* Slightly brighter golden text */
+}
+
+.hidden-checkbox:checked + .category-label {
+    background-color: #10335a;  /* Darker background for selected state */
+    color: #b7972d; /* Brighter golden text for selected state */
+    font-weight: bold;
+    outline: 2px solid #b7972d;
+}
