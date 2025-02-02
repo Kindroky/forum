@@ -88,7 +88,7 @@ input {
     font-size: 14px;
 }
 
-textarea {
+comment-box {
     width: 98%;
     padding: 10px;
     margin-bottom: 20px;
@@ -97,7 +97,7 @@ textarea {
     font-size: 14px;
     resize: vertical;
     max-height: 2000px;
-    min-height: 90px;
+    min-height: 130px;
 }
 
 .create-post-button {

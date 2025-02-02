@@ -4,15 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comment</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/comments.css">
 </head>
 <body>
+    <a href="/">
+        <div class="home-icon">
+            <img src="/static/FoL-ICON.png" alt="Forum Icon">
+        </div>
+    </a>
+<header>
+   <div class="site-logo">
+          <img src="/static/FoL-Logo.png" alt="Forum Name">
+    </div>
+</header>
+  <!-- Site Logo -->
+
     <div class="container">
-        <h1>comment</h1>
+        <h1>Comment</h1>
         <form action="/comment" method="POST">
             <input type="hidden" name="ID" value="{{.ID}}">
-            <label for="comment">Comment:</label>
-            <input type="comment" id="comment" name="comment" required><br><br>
+            <label for="comment">Write your thoughts</label>
+            <textarea id="comment" name="comment" class="comment-box" required></textarea>
             <button type="submit">comment</button>
         </form>
         <p>Misclick? <a href="/homepage">go back</a>.</p>

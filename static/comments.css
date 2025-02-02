@@ -1,0 +1,144 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: url("comments-background.jpg") no-repeat center center fixed;
+    background-size: cover;
+    color: #ffffff;
+}
+
+/* Main Container */
+.container {
+    width: 40%;
+    margin: 10px auto;
+    background: rgba(36, 36, 36, 0.566);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+/* Page Title */
+h1 {
+    color: #f33d3dde;
+    font-size: 38px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* Label Styling */
+label {
+    display: block;
+    font-size: 16px;
+    color: #b0b0b0d3;
+    font-style: italic;
+    margin-bottom: 5px;
+    text-align: left; /* Aligns the label to the left */
+}
+
+/* Comment Text Area */
+textarea {
+    width: 98%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    resize: vertical;
+    max-height: 2000px;
+    min-height: 90px;
+}
+
+/* Submit Button */
+button {
+    width: 80%; /* Slightly smaller width */
+    padding: 12px;
+    background-color: #d85151dc;
+    color: rgb(255, 255, 255);
+    font-size: 20px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-top: 10px;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background-color: #f56161dc;
+    color: #ffe8e8;
+}
+
+/* Go Back Link */
+p {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #999;
+}
+
+p a {
+    color: #bbb;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+p a:hover {
+    color: #de4e4ed3;
+}
+
+/* Header Logo */
+header img {
+    height: 100px;
+    cursor: pointer;
+}
+
+/* Home Icon */
+.home-icon {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 120px;
+    height: 120px;
+}
+
+.home-icon img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+header img {
+    height: 100px;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+    position: relative;
+    top: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        width: 90%;
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    textarea {
+        height: 150px;
+    }
+
+    button {
+        width: 100%; /* On mobile, make button full width */
+    }
+
+    .home-icon {
+        width: 50px;
+        height: 50px;
+    }
+}
